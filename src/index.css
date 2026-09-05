@@ -1,0 +1,169 @@
+:root {
+  --text: #3f3a44;
+  --text-h: #1f1b24;
+  --bg: #faf9f6;
+  --surface: #ffffff;
+  --border: #e4e0d8;
+  --accent: #7a5230;
+  --accent-bg: rgba(122, 82, 48, 0.08);
+
+  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+
+  font: 18px/1.5 var(--sans);
+  color-scheme: light;
+  color: var(--text);
+  background: var(--bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+h1,
+h2 {
+  color: var(--text-h);
+  font-weight: 600;
+}
+
+#root {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+}
+
+.site-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 24px 48px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.site-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-h);
+  text-decoration: none;
+}
+
+.site-nav {
+  display: flex;
+  gap: 24px;
+}
+
+.site-nav a {
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.site-nav a:hover {
+  color: var(--accent);
+}
+
+.site-main {
+  flex: 1;
+  width: 1120px;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+.gallery-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.gallery-card-img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  display: block;
+  background: var(--accent-bg);
+}
+
+.gallery-card-placeholder {
+  height: 200px;
+}
+
+.gallery-card-body {
+  padding: 16px;
+}
+
+.gallery-card-body h2 {
+  margin: 0 0 4px;
+  font-size: 20px;
+}
+
+.gallery-card-category {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+.gallery-card-body p {
+  margin: 0;
+  font-size: 16px;
+}
+
+.gallery-note {
+  text-align: center;
+  color: var(--text);
+  padding: 48px 0;
+}
+
+.gallery-error {
+  color: #b3261e;
+}
+
+.contact {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.contact h1 {
+  font-size: 36px;
+}
+
+.contact-list {
+  list-style: none;
+  padding: 0;
+  margin: 24px 0 0;
+  display: grid;
+  gap: 8px;
+}
+
+.contact-list a {
+  color: var(--accent);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.contact-list a:hover {
+  text-decoration: underline;
+}
