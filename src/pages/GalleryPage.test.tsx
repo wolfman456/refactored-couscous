@@ -1,0 +1,70 @@
+import { beforeEach, describe, expect, it } from 'vitest'
+import { fireEvent, render, screen } from '@testing-library/react'
+import GalleryPage from './GalleryPage'
+import { jsonResponse, mockFetch, restoreFetch, sampleCategories, sampleGallery } from '../test/testUtils'
+
+describe('GalleryPage', () => {
+  beforeEach(() => {
+    restoreFetch()
+  })
+
+  it('renders the default All tab with every piece', async () => {
+    mockFetch((url) => {
+      if (url === '/api/categories') {
+        return jsonResponse(sampleCategories)
+      }
+      return jsonResponse(sampleGallery)
+    })
+    render(<GalleryPage />)
+    expect(screen.getByText('Loading gallery…')).toBeInTheDocument()
+    expect(await screen.findByText('Oak shelf')).toBeInTheDocument()
+    expect(screen.getByText('Walnut box')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Shelves' })).toBeInTheDocument()
+  })
+
+  it('filters by the active category tab', async () => {
+    mockFetch((url) => {
+      if (url === '/api/categories') {
+        return jsonResponse(sampleCategories)
+      }
+      return jsonResponse(sampleGallery)
+    })
+    render(<GalleryPage />)
+    await screen.findByText('Oak shelf')
+    fireEvent.click(screen.getByRole('button', { name: 'Shelves' }))
+    expect(screen.getByText('Oak shelf')).toBeInTheDocument()
+    expect(screen.queryByText('Walnut box')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'All' }))
+    expect(screen.getByText('Walnut box')).toBeInTheDocument()
+  })
+
+  it('shows a fallback when the gallery is empty', async () => {
+    mockFetch((url) => {
+      if (url === '/api/categories') {
+        return jsonResponse([])
+      }
+      return jsonResponse([])
+    })
+    render(<GalleryPage />)
+    expect(await screen.findByText('No pieces posted yet — check back soon.')).toBeInTheDocument()
+  })
+
+  it('shows the fetch error message', async () => {
+    mockFetch(() => jsonResponse({}, 500))
+    render(<GalleryPage />)
+    expect(await screen.findByText('Request failed with status 500')).toBeInTheDocument()
+  })
+
+  it('shows a note when the active category has no pieces', async () => {
+    mockFetch((url) => {
+      if (url === '/api/categories') {
+        return jsonResponse([...sampleCategories, { id: 9, name: 'Empty tab', sortOrder: 9 }])
+      }
+      return jsonResponse(sampleGallery)
+    })
+    render(<GalleryPage />)
+    await screen.findByText('Oak shelf')
+    fireEvent.click(screen.getByRole('button', { name: 'Empty tab' }))
+    expect(screen.getByText('Nothing in this category yet.')).toBeInTheDocument()
+  })
+})

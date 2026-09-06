@@ -1,11 +1,65 @@
+import { useState } from 'react'
+import { hasCredential, setCredential } from '../api/client'
+import AdminLogin from '../admin/AdminLogin'
+import PhotosPanel from '../admin/PhotosPanel'
+import GalleryPanel from '../admin/GalleryPanel'
+import ArticlesPanel from '../admin/ArticlesPanel'
+import TabsPanel from '../admin/TabsPanel'
+import SitePanel from '../admin/SitePanel'
+
+type Panel = 'photos' | 'gallery' | 'articles' | 'tabs' | 'site'
+
+const PANELS: { key: Panel; label: string }[] = [
+  { key: 'photos', label: 'Photos' },
+  { key: 'gallery', label: 'Gallery' },
+  { key: 'articles', label: 'Articles' },
+  { key: 'tabs', label: 'Tabs' },
+  { key: 'site', label: 'Site' },
+]
+
 export default function AdminPage() {
+  const [authed, setAuthed] = useState(hasCredential())
+  const [panel, setPanel] = useState<Panel>('photos')
+
+  if (!authed) {
+    return <AdminLogin onSuccess={() => setAuthed(true)} />
+  }
+
   return (
-    <section className="contact">
-      <h1>Admin</h1>
-      <p>
-        The content manager is under development. Soon you&apos;ll be able to
-        upload pictures and add pieces here without touching code.
-      </p>
+    <section className="admin">
+      <div className="admin-bar">
+        <h1>Content manager</h1>
+        <nav className="admin-tabs" aria-label="Manager sections">
+          {PANELS.map((entry) => (
+            <button
+              key={entry.key}
+              type="button"
+              className={`admin-tab${panel === entry.key ? ' admin-tab-active' : ''}`}
+              onClick={() => setPanel(entry.key)}
+              aria-pressed={panel === entry.key}
+            >
+              {entry.label}
+            </button>
+          ))}
+        </nav>
+        <button
+          type="button"
+          className="admin-logout"
+          onClick={() => {
+            setCredential(null)
+            setAuthed(false)
+          }}
+        >
+          Log out
+        </button>
+      </div>
+      <div className="admin-panel">
+        {panel === 'photos' && <PhotosPanel />}
+        {panel === 'gallery' && <GalleryPanel />}
+        {panel === 'articles' && <ArticlesPanel />}
+        {panel === 'tabs' && <TabsPanel />}
+        {panel === 'site' && <SitePanel />}
+      </div>
     </section>
   )
 }

@@ -1,17 +1,24 @@
 import { Link, Route, Routes } from 'react-router-dom'
 import GalleryPage from './pages/GalleryPage'
+import ArticlesPage from './pages/ArticlesPage'
+import ArticlePage from './pages/ArticlePage'
 import ContactPage from './pages/ContactPage'
 import AdminPage from './pages/AdminPage'
+import { SiteSettingsProvider, useSiteSettings } from './components/SiteSettingsContext'
 
-function App() {
+function Shell() {
+  const settings = useSiteSettings()
+  const title = settings?.siteTitle || 'Six Kids Crafts'
+  const background = settings?.backgroundImage
   return (
-    <>
+    <div className="page" style={background ? { backgroundImage: `url("${background}")` } : undefined}>
       <header className="site-header">
         <Link to="/" className="site-title">
-          Six Kids Crafts
+          {title}
         </Link>
         <nav className="site-nav">
           <Link to="/">Gallery</Link>
+          <Link to="/articles">Articles</Link>
           <Link to="/contact">Contact</Link>
           <Link to="/admin">Admin</Link>
         </nav>
@@ -19,11 +26,21 @@ function App() {
       <main className="site-main">
         <Routes>
           <Route path="/" element={<GalleryPage />} />
+          <Route path="/articles" element={<ArticlesPage />} />
+          <Route path="/articles/:slug" element={<ArticlePage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/admin" element={<AdminPage />} />
         </Routes>
       </main>
-    </>
+    </div>
+  )
+}
+
+function App() {
+  return (
+    <SiteSettingsProvider>
+      <Shell />
+    </SiteSettingsProvider>
   )
 }
 
