@@ -1,13 +1,33 @@
-const contact = {
-  email: 'hello@example.com',
-  etsy: 'https://www.etsy.com/shop/your-shop',
-  social: [
-    { label: 'Instagram', url: 'https://instagram.com/your-handle' },
-    { label: 'Facebook', url: 'https://facebook.com/your-page' },
-  ],
+import { useSiteSettings } from '../components/SiteSettingsContext'
+import type { SiteSettings } from '../api/settings'
+
+interface ContactLink {
+  key: string
+  label: string
+  url: string
+}
+
+function contactLinks(settings: SiteSettings): ContactLink[] {
+  const links: ContactLink[] = []
+  if (settings.contactEmail) {
+    links.push({ key: 'email', label: settings.contactEmail, url: `mailto:${settings.contactEmail}` })
+  }
+  if (settings.etsyUrl) {
+    links.push({ key: 'etsy', label: 'Etsy shop', url: settings.etsyUrl })
+  }
+  if (settings.instagramUrl) {
+    links.push({ key: 'instagram', label: 'Instagram', url: settings.instagramUrl })
+  }
+  if (settings.facebookUrl) {
+    links.push({ key: 'facebook', label: 'Facebook', url: settings.facebookUrl })
+  }
+  return links
 }
 
 export default function ContactPage() {
+  const settings = useSiteSettings()
+  const links = settings ? contactLinks(settings) : []
+
   return (
     <section className="contact">
       <h1>Contact</h1>
@@ -15,23 +35,19 @@ export default function ContactPage() {
         Have a question about a piece, a custom commission, or just want to say
         hello? Reach out any time.
       </p>
-      <ul className="contact-list">
-        <li>
-          <a href={`mailto:${contact.email}`}>{contact.email}</a>
-        </li>
-        <li>
-          <a href={contact.etsy} target="_blank" rel="noreferrer">
-            Etsy shop
-          </a>
-        </li>
-        {contact.social.map(({ label, url }) => (
-          <li key={label}>
-            <a href={url} target="_blank" rel="noreferrer">
-              {label}
-            </a>
-          </li>
-        ))}
-      </ul>
+      {links.length === 0 ? (
+        <p>Our contact details are coming soon.</p>
+      ) : (
+        <ul className="contact-list">
+          {links.map((link) => (
+            <li key={link.key}>
+              <a href={link.url} target="_blank" rel="noreferrer">
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
   )
 }
