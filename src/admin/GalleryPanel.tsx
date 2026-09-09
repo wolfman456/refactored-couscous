@@ -52,10 +52,9 @@ export default function GalleryPanel() {
   const [loading, setLoading] = useState(true)
 
   const refresh = useCallback(() => {
-    setLoading(true)
-    setError(null)
     Promise.all([fetchAdminGallery(), fetchAdminCategories()])
       .then(([galleryItems, tabs]) => {
+        setError(null)
         setItems(galleryItems)
         setCategories(tabs)
       })

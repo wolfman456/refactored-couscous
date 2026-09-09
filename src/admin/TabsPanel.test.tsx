@@ -107,9 +107,17 @@ describe('TabsPanel', () => {
     expect(messages.length).toBeGreaterThan(0)
   })
 
-  it('cancels an edit and resets the form', async () => {
-    mockFetch(() => jsonResponse(sampleCategories))
-    render(<TabsPanel />)
+   it('shows a load failure with a non-Error', async () => {
+     mockFetch(() => {
+       throw 'load boom'
+     })
+     render(<TabsPanel />)
+     expect(await screen.findByText('Failed to load categories')).toBeInTheDocument()
+   })
+
+   it('cancels an edit and resets the form', async () => {
+     mockFetch(() => jsonResponse(sampleCategories))
+     render(<TabsPanel />)
     await screen.findByText(rowText('Shelves (order 1)'))
     fireEvent.click(screen.getAllByRole('button', { name: 'Edit' })[0])
     expect(screen.getByRole('heading', { name: /Edit tab/ })).toBeInTheDocument()
@@ -144,24 +152,75 @@ describe('TabsPanel', () => {
     expect(await screen.findByText('Request failed with status 500')).toBeInTheDocument()
   })
 
-  it('deleting the category being edited resets the form', async () => {
-    let deleted = false
+   it('shows a save failure with a non-Error', async () => {
     mockFetch((url, init) => {
-      if (url === '/api/admin/categories/1' && init?.method === 'DELETE') {
-        deleted = true
-        return noContent()
+      if (url === '/api/admin/categories' && init?.method === 'POST') {
+        throw 'save boom'
       }
-      if (url === '/api/admin/categories') {
-        return jsonResponse(deleted ? [] : sampleCategories)
-      }
-      return jsonResponse({}, 404)
+      return jsonResponse(sampleCategories)
     })
     render(<TabsPanel />)
-    await screen.findByText(rowText('Shelves (order 1)'))
-    fireEvent.click(screen.getAllByRole('button', { name: 'Edit' })[0])
-    expect(screen.getByRole('heading', { name: /Edit tab/ })).toBeInTheDocument()
-    fireEvent.click(screen.getAllByRole('button', { name: 'Delete' })[0])
-    expect(await screen.findByRole('heading', { name: 'Add a tab' })).toBeInTheDocument()
-    expect(await screen.findByText('No categories yet.')).toBeInTheDocument()
+    await screen.findByText(/Shelves \(order 1\)/)
+    fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Oops' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save tab' }))
+    await waitFor(() => expect(screen.getByText('Failed to save category')).toBeInTheDocument())
   })
+
+  it('surfaces a delete failure with a non-Error', async () => {
+     mockFetch((url, init) => {
+       if (url === '/api/admin/categories/1' && init?.method === 'DELETE') {
+         throw 'delete boom'
+       }
+       if (url === '/api/admin/categories') {
+         return jsonResponse(sampleCategories)
+       }
+       return jsonResponse({}, 404)
+     })
+     render(<TabsPanel />)
+     await screen.findByText(rowText('Shelves (order 1)'))
+     fireEvent.click(screen.getAllByRole('button', { name: 'Delete' })[0])
+     expect(await screen.findByText('Failed to delete category')).toBeInTheDocument()
+   })
+
+   it('deleting a non-edited category does not reset the form', async () => {
+     let deleted = false
+     mockFetch((url, init) => {
+       if (url === '/api/admin/categories/2' && init?.method === 'DELETE') {
+         deleted = true
+         return noContent()
+       }
+       if (url === '/api/admin/categories') {
+         return jsonResponse(deleted ? sampleCategories.slice(0, 1) : sampleCategories)
+       }
+       return jsonResponse({}, 404)
+     })
+     render(<TabsPanel />)
+     await screen.findByText(rowText('Shelves (order 1)'))
+     fireEvent.click(screen.getAllByRole('button', { name: 'Edit' })[0])
+     expect(screen.getByRole('heading', { name: /Edit tab/ })).toBeInTheDocument()
+     fireEvent.click(screen.getAllByRole('button', { name: 'Delete' })[1])
+     await screen.findByText(rowText('Shelves (order 1)'))
+     expect(screen.getByRole('heading', { name: /Edit tab/ })).toBeInTheDocument()
+   })
+
+   it('deleting the category being edited resets the form', async () => {
+     let deleted = false
+     mockFetch((url, init) => {
+       if (url === '/api/admin/categories/1' && init?.method === 'DELETE') {
+         deleted = true
+         return noContent()
+       }
+       if (url === '/api/admin/categories') {
+         return jsonResponse(deleted ? [] : sampleCategories)
+       }
+       return jsonResponse({}, 404)
+     })
+     render(<TabsPanel />)
+     await screen.findByText(rowText('Shelves (order 1)'))
+     fireEvent.click(screen.getAllByRole('button', { name: 'Edit' })[0])
+     expect(screen.getByRole('heading', { name: /Edit tab/ })).toBeInTheDocument()
+     fireEvent.click(screen.getAllByRole('button', { name: 'Delete' })[0])
+     expect(await screen.findByRole('heading', { name: 'Add a tab' })).toBeInTheDocument()
+     expect(await screen.findByText('No categories yet.')).toBeInTheDocument()
+   })
 })

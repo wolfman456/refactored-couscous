@@ -37,10 +37,9 @@ export default function SitePanel() {
   const [saved, setSaved] = useState(false)
 
   const refresh = useCallback(() => {
-    setLoading(true)
-    setError(null)
     fetchAdminSettings()
       .then((settings) => {
+        setError(null)
         const form = toForm(settings)
         setSiteTitle(form.siteTitle)
         setBackgroundMediaId(form.backgroundMediaId)

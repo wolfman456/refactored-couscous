@@ -287,28 +287,36 @@ describe('GalleryPanel', () => {
     expect(await screen.findByText('0 selected')).toBeInTheDocument()
   })
 
-  it('surfaces generic messages when calls fail with non-Error rejections', async () => {
-    mockFetch((url, init) => {
-      if (url === '/api/admin/categories') {
-        return jsonResponse(sampleCategories)
-      }
-      if (url === '/api/admin/gallery' && init?.method === 'POST') {
-        throw 'boom'
-      }
-      if (url === '/api/admin/gallery/1' && init?.method === 'DELETE') {
-        throw 'boom'
-      }
-      if (url === '/api/admin/gallery') {
-        return jsonResponse(sampleGallery)
-      }
-      return jsonResponse({}, 404)
-    })
-    render(<GalleryPanel />)
-    await screen.findByText('Oak shelf')
-    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Fails' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Save piece' }))
-    expect(await screen.findByText('Failed to save piece')).toBeInTheDocument()
-    fireEvent.click(screen.getAllByRole('button', { name: 'Delete' })[0])
-    expect(await screen.findByText('Failed to delete piece')).toBeInTheDocument()
-  })
+   it('surfaces generic messages when calls fail with non-Error rejections', async () => {
+     mockFetch((url, init) => {
+       if (url === '/api/admin/categories') {
+         return jsonResponse(sampleCategories)
+       }
+       if (url === '/api/admin/gallery' && init?.method === 'POST') {
+         throw 'boom'
+       }
+       if (url === '/api/admin/gallery/1' && init?.method === 'DELETE') {
+         throw 'boom'
+       }
+       if (url === '/api/admin/gallery') {
+         return jsonResponse(sampleGallery)
+       }
+       return jsonResponse({}, 404)
+     })
+     render(<GalleryPanel />)
+     await screen.findByText('Oak shelf')
+     fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Fails' } })
+     fireEvent.click(screen.getByRole('button', { name: 'Save piece' }))
+     expect(await screen.findByText('Failed to save piece')).toBeInTheDocument()
+     fireEvent.click(screen.getAllByRole('button', { name: 'Delete' })[0])
+     expect(await screen.findByText('Failed to delete piece')).toBeInTheDocument()
+   })
+
+   it('surfaces a load failure with a non-Error', async () => {
+     mockFetch(() => {
+       throw 'load boom'
+     })
+     render(<GalleryPanel />)
+     expect(await screen.findByText('Failed to load gallery')).toBeInTheDocument()
+   })
 })

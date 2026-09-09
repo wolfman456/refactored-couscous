@@ -1,14 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { fetchArticles, type ArticleSummary } from '../api/articles'
-
-export function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
-}
+import { formatDate } from './articleUtils'
 
 export default function ArticlesPage() {
   const [articles, setArticles] = useState<ArticleSummary[]>([])

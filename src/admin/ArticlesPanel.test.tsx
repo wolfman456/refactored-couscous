@@ -28,7 +28,42 @@ describe('ArticlesPanel', () => {
     expect(
       await screen.findByText(rowText('First post (first-post)')),
     ).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Write an article' })).toBeInTheDocument()
+     expect(screen.getByRole('heading', { name: 'Write an article' })).toBeInTheDocument()
+  })
+
+  it('clears featured media id when deselecting the featured photo', async () => {
+    const articleWithFeatured = { ...sampleArticles[0], featuredMediaId: 11, mediaIds: [11, 12] }
+    const fn = mockFetch((url, init) => {
+      if (url === '/api/admin/articles') {
+        return jsonResponse([articleWithFeatured])
+      }
+      if (url === '/api/admin/media') {
+        return jsonResponse(sampleMedia)
+      }
+      if (url === '/api/admin/articles/1' && init?.method === 'PUT') {
+        const body = JSON.parse(init?.body as string) as { featuredMediaId: number | null }
+        expect(body.featuredMediaId).toBeNull()
+        return jsonResponse({ id: 1, title: 'First post' })
+      }
+      return jsonResponse({}, 404)
+    })
+    render(<ArticlesPanel />)
+    await screen.findByText(rowText('First post (first-post)'))
+    fireEvent.click(screen.getAllByRole('button', { name: 'Edit' })[0])
+    await screen.findByAltText('Library photo 11')
+    // Deselect the featured photo (11) by toggling it off
+    fireEvent.click(screen.getByAltText('Library photo 11'))
+    expect(screen.getByText('1 selected')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Save article' }))
+    await waitFor(() => expect(fn).toHaveBeenCalledWith('/api/admin/articles/1', expect.objectContaining({ method: 'PUT' })))
+  })
+
+  it('shows a load failure with a non-Error', async () => {
+    mockFetch(() => {
+      throw 'boom'
+    })
+    render(<ArticlesPanel />)
+    await screen.findByText('Failed to load articles')
   })
 
   it('shows the empty state', async () => {
@@ -102,10 +137,44 @@ describe('ArticlesPanel', () => {
         '/api/admin/articles',
         expect.objectContaining({ method: 'POST' }),
       ),
-    )
-  })
+     )
+   })
 
-  it('edits an existing article', async () => {
+   it('deselects a featured photo and clears the featured media id', async () => {
+     const fn = mockFetch((url, init) => {
+       if (url === '/api/admin/articles/1' && init?.method === 'PUT') {
+         const body = JSON.parse(init?.body as string) as {
+           mediaIds: number[]
+           featuredMediaId: number | null
+         }
+         expect(body.featuredMediaId).toBeNull()
+         return jsonResponse({ id: 1, title: 'First post' })
+       }
+       if (url === '/api/admin/media') {
+         return jsonResponse(sampleMedia)
+       }
+       if (url === '/api/admin/articles') {
+         return jsonResponse(sampleArticles)
+       }
+       return jsonResponse({}, 404)
+     })
+     render(<ArticlesPanel />)
+     await screen.findByText(rowText('First post (first-post)'))
+     fireEvent.click(screen.getAllByRole('button', { name: 'Edit' })[0])
+     await screen.findByAltText('Library photo 11')
+     fireEvent.click(screen.getByAltText('Library photo 11'))
+     const cover = await screen.findByLabelText('Cover image')
+     fireEvent.change(cover, { target: { value: '' } })
+     fireEvent.click(screen.getByRole('button', { name: 'Save article' }))
+     await waitFor(() =>
+       expect(fn).toHaveBeenCalledWith(
+         '/api/admin/articles/1',
+         expect.objectContaining({ method: 'PUT' }),
+       ),
+     )
+   })
+
+   it('edits an existing article', async () => {
     let edited = false
     const fn = mockFetch((url, init) => {
       if (url === '/api/admin/articles/1' && init?.method === 'PUT') {
@@ -254,6 +323,49 @@ describe('ArticlesPanel', () => {
     expect(await screen.findByRole('heading', { name: 'Write an article' })).toBeInTheDocument()
     expect(await screen.findByText('No articles yet.')).toBeInTheDocument()
   })
+
+  it('surfaces a save failure with a non-Error rejection', async () => {
+    mockFetch((url, init) => {
+      if (url === '/api/admin/articles' && init?.method === 'POST') {
+        throw 'save boom'
+      }
+      return jsonResponse([])
+    })
+    render(<ArticlesPanel />)
+    await screen.findByText('No articles yet.')
+    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Fails' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save article' }))
+    expect(await screen.findByText('Failed to save article')).toBeInTheDocument()
+  })
+
+  it('surfaces a delete failure with a non-Error rejection', async () => {
+    mockFetch((url, init) => {
+      if (url === '/api/admin/articles/1' && init?.method === 'DELETE') {
+        throw 'delete boom'
+      }
+      if (url === '/api/admin/articles') {
+        return jsonResponse(sampleArticles)
+      }
+      return jsonResponse({}, 404)
+    })
+    render(<ArticlesPanel />)
+    await screen.findByText(rowText('First post (first-post)'))
+    fireEvent.click(screen.getAllByRole('button', { name: 'Delete' })[0])
+    expect(await screen.findByText('Failed to delete article')).toBeInTheDocument()
+  })
+
+   it('edits an article with no attached media', async () => {
+    mockFetch((url) => {
+       if (url === '/api/admin/articles') {
+         return jsonResponse([{ ...sampleArticles[0], mediaIds: undefined }])
+       }
+       return jsonResponse({}, 404)
+     })
+     render(<ArticlesPanel />)
+     await screen.findByText(rowText('First post (first-post)'))
+     fireEvent.click(screen.getAllByRole('button', { name: 'Edit' })[0])
+     expect(screen.queryByLabelText('Cover image')).not.toBeInTheDocument()
+   })
 
   it('toggles attached photos during editing', async () => {
     const fn = mockFetch((url, init) => {

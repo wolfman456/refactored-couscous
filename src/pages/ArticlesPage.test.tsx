@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import ArticlesPage, { formatDate } from './ArticlesPage'
+import ArticlesPage from './ArticlesPage'
+import { formatDate } from './articleUtils'
 import { jsonResponse, mockFetch, restoreFetch, sampleArticles } from '../test/testUtils'
 
 describe('ArticlesPage', () => {
@@ -59,6 +60,18 @@ describe('ArticlesPage', () => {
     await screen.findByRole('link', { name: /First post/ })
     const img = container.querySelector('img.article-card-img')
     expect(img?.getAttribute('src')).toBe('/uploads/hero.jpg')
+  })
+
+  it('surfaces a load failure with a non-Error', async () => {
+    mockFetch(() => {
+      throw 'boom'
+    })
+    render(
+      <MemoryRouter>
+        <ArticlesPage />
+      </MemoryRouter>,
+    )
+    expect(await screen.findByText('Failed to load articles')).toBeInTheDocument()
   })
 
   it('formats article dates', () => {

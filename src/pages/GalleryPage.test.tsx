@@ -67,4 +67,12 @@ describe('GalleryPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Empty tab' }))
     expect(screen.getByText('Nothing in this category yet.')).toBeInTheDocument()
   })
+
+  it('surfaces a load failure with a non-Error', async () => {
+    mockFetch(() => {
+      throw 'boom'
+    })
+    render(<GalleryPage />)
+    expect(await screen.findByText('Failed to load gallery')).toBeInTheDocument()
+  })
 })
