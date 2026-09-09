@@ -14,10 +14,11 @@ export default function PhotoPicker({ selectedIds, onToggle }: PhotoPickerProps)
   const fileInput = useRef<HTMLInputElement>(null)
 
   const refresh = useCallback(() => {
-    setLoading(true)
-    setError(null)
     fetchMedia()
-      .then(setAssets)
+      .then((assets) => {
+        setError(null)
+        setAssets(assets)
+      })
       .catch((err: unknown) =>
         setError(err instanceof Error ? err.message : 'Failed to load photo library'),
       )

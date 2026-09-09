@@ -2,21 +2,23 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { fetchArticle, type Article } from '../api/articles'
 import Markdown from '../components/Markdown'
-import { formatDate } from './ArticlesPage'
+import { formatDate } from './articleUtils'
 
 export default function ArticlePage() {
   const { slug } = useParams()
   const [article, setArticle] = useState<Article | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(!!slug)
 
   useEffect(() => {
     if (!slug) {
-      setLoading(false)
       return
     }
     fetchArticle(slug)
-      .then(setArticle)
+      .then((article) => {
+        setError(null)
+        setArticle(article)
+      })
       .catch((err: unknown) =>
         setError(err instanceof Error ? err.message : 'Failed to load article'),
       )

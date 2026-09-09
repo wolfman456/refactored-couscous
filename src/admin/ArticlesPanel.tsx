@@ -45,10 +45,11 @@ export default function ArticlesPanel() {
   const [loading, setLoading] = useState(true)
 
   const refresh = useCallback(() => {
-    setLoading(true)
-    setError(null)
     fetchAdminArticles()
-      .then(setArticles)
+      .then((articles) => {
+        setError(null)
+        setArticles(articles)
+      })
       .catch((err: unknown) =>
         setError(err instanceof Error ? err.message : 'Failed to load articles'),
       )
@@ -73,7 +74,7 @@ export default function ArticlesPanel() {
     setDraft((prev) => ({
       ...prev,
       mediaIds: next,
-      featuredMediaId: featuredStillValid ? prev.featuredMediaId : prev.featuredMediaId,
+      featuredMediaId: featuredStillValid ? prev.featuredMediaId : null,
     }))
   }
 

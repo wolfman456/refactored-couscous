@@ -20,6 +20,34 @@ describe('ContactPage', () => {
     expect(screen.getByText('Our contact details are coming soon.')).toBeInTheDocument()
   })
 
+  it('shows coming soon when all contact links are absent', async () => {
+    mockFetch(() =>
+      jsonResponse({ ...sampleSettings, contactEmail: null, etsyUrl: null, instagramUrl: null, facebookUrl: null }),
+    )
+    render(
+      <SiteSettingsProvider>
+        <ContactPage />
+      </SiteSettingsProvider>,
+    )
+    await screen.findByText('Our contact details are coming soon.')
+  })
+
+  it('renders only the email link when other links are absent', async () => {
+    mockFetch(() =>
+      jsonResponse({ ...sampleSettings, etsyUrl: null, instagramUrl: null, facebookUrl: null }),
+    )
+    render(
+      <SiteSettingsProvider>
+        <ContactPage />
+      </SiteSettingsProvider>,
+    )
+    const email = await screen.findByRole('link', { name: 'hello@sixkidscrafts.com' })
+    expect(email.getAttribute('href')).toBe('mailto:hello@sixkidscrafts.com')
+    expect(screen.queryByText('Etsy shop')).not.toBeInTheDocument()
+    expect(screen.queryByText('Instagram')).not.toBeInTheDocument()
+    expect(screen.queryByText('Facebook')).not.toBeInTheDocument()
+  })
+
   it('renders the contact links from settings', async () => {
     mockFetch(() =>
       jsonResponse({
