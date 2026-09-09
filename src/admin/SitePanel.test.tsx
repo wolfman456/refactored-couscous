@@ -157,4 +157,19 @@ describe('SitePanel', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save settings' }))
     expect(await screen.findByText('Failed to save settings')).toBeInTheDocument()
   })
+
+  it('prefills with null contact fields when settings have null values', async () => {
+    mockFetch((url) => {
+      if (url === '/api/admin/media') {
+        return jsonResponse(sampleMedia)
+      }
+      return jsonResponse({ ...sampleSettings, contactEmail: null, etsyUrl: null, instagramUrl: null, facebookUrl: null })
+    })
+    render(<SitePanel />)
+    await screen.findByLabelText('Site title')
+    expect(screen.getByLabelText('Contact email')).toHaveValue('')
+    expect(screen.getByLabelText('Etsy shop URL')).toHaveValue('')
+    expect(screen.getByLabelText('Instagram URL')).toHaveValue('')
+    expect(screen.getByLabelText('Facebook URL')).toHaveValue('')
+  })
 })

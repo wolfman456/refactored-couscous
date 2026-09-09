@@ -16,10 +16,11 @@ export default function TabsPanel() {
   const [loading, setLoading] = useState(true)
 
   const refresh = useCallback(() => {
-    setLoading(true)
-    setError(null)
     fetchAdminCategories()
-      .then(setCategories)
+      .then((categories) => {
+        setError(null)
+        setCategories(categories)
+      })
       .catch((err: unknown) =>
         setError(err instanceof Error ? err.message : 'Failed to load categories'),
       )
