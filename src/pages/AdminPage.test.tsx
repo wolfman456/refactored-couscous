@@ -27,7 +27,7 @@ describe('AdminPage', () => {
           return jsonResponse([])
         }
         expect(url).toBe('/api/admin/settings')
-        expect((init?.headers ?? {} as Record<string, string>).Authorization).toBe(
+        expect((init?.headers as Record<string, string>).Authorization).toBe(
           'Basic YWRtaW46cHc=',
         )
         return jsonResponse(sampleSettings)
