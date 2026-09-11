@@ -6,6 +6,7 @@ import {
   type Article,
 } from '../api/articles'
 import PhotoPicker from '../components/PhotoPicker'
+import { draftArticle } from '../api/ai'
 
 interface DraftForm {
   title: string
@@ -42,6 +43,8 @@ export default function ArticlesPanel() {
   const [slugTouched, setSlugTouched] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [drafting, setDrafting] = useState(false)
+  const [aiTopic, setAiTopic] = useState('')
   const [loading, setLoading] = useState(true)
 
   const refresh = useCallback(() => {
@@ -64,6 +67,7 @@ export default function ArticlesPanel() {
     setEditingId(null)
     setDraft(emptyDraft())
     setSlugTouched(false)
+    setAiTopic('')
   }
 
   const toggleMedia = (id: number) => {
@@ -125,6 +129,25 @@ export default function ArticlesPanel() {
     })
     setSlugTouched(true)
     setError(null)
+  }
+
+  const handleDraftWithAi = async () => {
+    setError(null)
+    setDrafting(true)
+    try {
+      const ai = await draftArticle({ topic: aiTopic, mediaIds: draft.mediaIds })
+      setDraft((prev) => ({
+        ...prev,
+        title: ai.title,
+        bodyMd: ai.bodyMd,
+        slug: slugify(ai.title),
+      }))
+      setSlugTouched(false)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to draft article')
+    } finally {
+      setDrafting(false)
+    }
   }
 
   return (
@@ -194,6 +217,22 @@ export default function ArticlesPanel() {
             onChange={(e) => setDraft((prev) => ({ ...prev, bodyMd: e.target.value }))}
           />
         </label>
+        <div className="ai-row">
+          <input
+            type="text"
+            placeholder="Topic to inspire the draft"
+            aria-label="AI topic"
+            value={aiTopic}
+            onChange={(e) => setAiTopic(e.target.value)}
+          />
+          <button
+            type="button"
+            disabled={drafting || saving}
+            onClick={() => void handleDraftWithAi()}
+          >
+            {drafting ? 'Drafting…' : 'Draft with AI'}
+          </button>
+        </div>
         <label className="admin-checkbox">
           <input
             type="checkbox"

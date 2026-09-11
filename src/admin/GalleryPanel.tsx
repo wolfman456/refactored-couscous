@@ -6,6 +6,8 @@ import {
   type GalleryItem,
 } from '../api/gallery'
 import { fetchAdminCategories, type Category } from '../api/categories'
+import { describeImage } from '../api/ai'
+import { fetchMedia } from '../api/media'
 import PhotoPicker from '../components/PhotoPicker'
 
 interface DraftForm {
@@ -49,6 +51,7 @@ export default function GalleryPanel() {
   const [extraImage, setExtraImage] = useState<File | undefined>()
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [drafting, setDrafting] = useState(false)
   const [loading, setLoading] = useState(true)
 
   const refresh = useCallback(() => {
@@ -117,6 +120,38 @@ export default function GalleryPanel() {
     setDraft((prev) => ({ ...prev, ...patch }))
   }
 
+  const handleDraftDescription = async () => {
+    setError(null)
+    setDrafting(true)
+    try {
+      let file: File | undefined
+      if (extraImage) {
+        file = extraImage
+      } else {
+        const assets = await fetchMedia()
+        const chosen = assets.find(
+          (asset) => asset.assetType === 'IMAGE' && draft.mediaIds.includes(asset.id),
+        )
+        if (chosen) {
+          const res = await fetch(chosen.url)
+          const blob = await res.blob()
+          file = new File([blob], `photo-${chosen.id}`, {
+            type: chosen.contentType ?? 'image/jpeg',
+          })
+        }
+      }
+      if (!file) {
+        throw new Error('Pick a photo first')
+      }
+      const { description } = await describeImage(file)
+      setDraft((prev) => ({ ...prev, description }))
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to generate description')
+    } finally {
+      setDrafting(false)
+    }
+  }
+
   return (
     <section>
       <h2>Gallery pieces</h2>
@@ -175,6 +210,16 @@ export default function GalleryPanel() {
             onChange={(e) => setDraftField({ description: e.target.value })}
           />
         </label>
+        {(draft.mediaIds.length > 0 || extraImage) && (
+          <button
+            type="button"
+            className="ai-inline"
+            disabled={drafting || saving}
+            onClick={() => void handleDraftDescription()}
+          >
+            {drafting ? 'Drafting…' : 'Draft description from photo'}
+          </button>
+        )}
         <label>
           Category
           <select
