@@ -21,9 +21,10 @@ ecommerce.**
   several photos are attached.
 - `/contact` — Contact page driven by `GET /api/settings` (email, Etsy shop,
   Instagram, Facebook). Shows a "coming soon" note until settings load.
-- `/admin` — Admin console: login (Basic auth via env out of scope; credentials
-  sent from the form), then tabs for Photo library, Gallery pieces, Articles,
-  Gallery tabs, and Site settings. Logout ends the session.
+- `/admin` — Admin console: login (Basic auth against the seeded admin
+  credentials; fallbacks `bloodwolf`/`NeedToChange`), then tabs for Photo
+  library, Gallery pieces, Articles, Gallery tabs, and Site settings, plus an
+  Account tab to change the admin password. Logout ends the session.
 
 ## Data flow
 
@@ -64,6 +65,7 @@ src/
     ArticlesPanel.tsx     auto slug until manually edited, cover select
     TabsPanel.tsx
     SitePanel.tsx         title, background photo, contact links
+    PasswordPanel.tsx     current/new/confirm password change
   App.tsx                 Shell (nav + settings title/background) + routes
   main.tsx                BrowserRouter + root render
 ```

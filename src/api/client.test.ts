@@ -5,6 +5,7 @@ import {
   apiFetch,
   encodeBasic,
   getCredential,
+  getUsername,
   hasCredential,
   setCredential,
 } from './client'
@@ -104,5 +105,13 @@ describe('api/client', () => {
     expect(getCredential()).toBe('abc')
     setCredential(null)
     expect(hasCredential()).toBe(false)
+  })
+
+  it('reads the username from the stored Basic credential', () => {
+    expect(getUsername()).toBeNull()
+    setCredential(encodeBasic('admin', 'pw'))
+    expect(getUsername()).toBe('admin')
+    setCredential('not base64')
+    expect(getUsername()).toBeNull()
   })
 })
