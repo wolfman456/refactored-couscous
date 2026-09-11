@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { encodeBasic, setCredential } from './client'
+import { changePassword } from './auth'
 import { fetchGalleryItem } from './gallery'
 import { uploadMedia } from './media'
 import { jsonResponse, mockFetch, restoreFetch } from '../test/testUtils'
@@ -40,5 +41,20 @@ describe('api module wrappers', () => {
     })
     await uploadMedia(new File(['x'], 'x.png'))
     expect(fn).toHaveBeenCalledWith('/api/admin/media', expect.objectContaining({ method: 'POST' }))
+  })
+
+  it('changePassword posts the form to the admin endpoint', async () => {
+    setCredential(encodeBasic('admin', 'pw'))
+    const fn = mockFetch((_url, init) => {
+      expect(init?.body).toBe('{"currentPassword":"pw","newPassword":"newpass123"}')
+      return jsonResponse({ username: 'admin' })
+    })
+    await expect(changePassword({ currentPassword: 'pw', newPassword: 'newpass123' })).resolves.toEqual({
+      username: 'admin',
+    })
+    expect(fn).toHaveBeenCalledWith(
+      '/api/admin/change-password',
+      expect.objectContaining({ method: 'POST' }),
+    )
   })
 })

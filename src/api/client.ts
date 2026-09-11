@@ -43,6 +43,18 @@ export function encodeBasic(username: string, password: string): string {
   return btoa(`${username}:${password}`)
 }
 
+export function getUsername(): string | null {
+  const token = getCredential()
+  if (token === null) {
+    return null
+  }
+  try {
+    return atob(token).split(':')[0] ?? null
+  } catch {
+    return null
+  }
+}
+
 export async function apiFetch<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const headers: HeadersInit = {}
   if (options.auth) {

@@ -6,8 +6,9 @@ import GalleryPanel from '../admin/GalleryPanel'
 import ArticlesPanel from '../admin/ArticlesPanel'
 import TabsPanel from '../admin/TabsPanel'
 import SitePanel from '../admin/SitePanel'
+import PasswordPanel from '../admin/PasswordPanel'
 
-type Panel = 'photos' | 'gallery' | 'articles' | 'tabs' | 'site'
+type Panel = 'photos' | 'gallery' | 'articles' | 'tabs' | 'site' | 'account'
 
 const PANELS: { key: Panel; label: string }[] = [
   { key: 'photos', label: 'Photos' },
@@ -15,6 +16,7 @@ const PANELS: { key: Panel; label: string }[] = [
   { key: 'articles', label: 'Articles' },
   { key: 'tabs', label: 'Tabs' },
   { key: 'site', label: 'Site' },
+  { key: 'account', label: 'Account' },
 ]
 
 export default function AdminPage() {
@@ -59,6 +61,7 @@ export default function AdminPage() {
         {panel === 'articles' && <ArticlesPanel />}
         {panel === 'tabs' && <TabsPanel />}
         {panel === 'site' && <SitePanel />}
+        {panel === 'account' && <PasswordPanel />}
       </div>
     </section>
   )
