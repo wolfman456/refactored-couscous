@@ -115,6 +115,8 @@ describe('AdminPage', () => {
       await screen.findByText('Gallery tabs')
       fireEvent.click(screen.getByRole('button', { name: 'Site' }))
       await screen.findByText('Site settings')
+      fireEvent.click(screen.getByRole('button', { name: 'Account' }))
+      await screen.findByRole('heading', { name: 'Change password' })
     })
   })
 })
