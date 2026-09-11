@@ -319,4 +319,110 @@ describe('GalleryPanel', () => {
      render(<GalleryPanel />)
      expect(await screen.findByText('Failed to load gallery')).toBeInTheDocument()
    })
+
+  it('drafts a description from a selected library photo', async () => {
+    const fn = mockFetch(async (url, init) => {
+      if (url === '/api/admin/categories') {
+        return jsonResponse(sampleCategories)
+      }
+      if (url === '/api/admin/gallery') {
+        return jsonResponse(sampleGallery)
+      }
+      if (url === '/api/admin/media') {
+        return jsonResponse(sampleMedia)
+      }
+      if (url === '/uploads/a.jpg') {
+        return { ok: true, status: 200, blob: () => Promise.resolve(new Blob(['img'])) } as Response
+      }
+      if (url === '/api/admin/ai/describe-image' && init?.method === 'POST') {
+        expect(init?.body).toBeInstanceOf(FormData)
+        return jsonResponse({ description: 'A hand-built oak shelf.' })
+      }
+      return jsonResponse({}, 404)
+    })
+    render(<GalleryPanel />)
+    await screen.findByText('Oak shelf')
+    fireEvent.click(screen.getAllByRole('button', { name: 'Edit' })[0])
+    fireEvent.click(screen.getByRole('button', { name: 'Draft description from photo' }))
+    await waitFor(() =>
+      expect(screen.getByLabelText('Description')).toHaveValue('A hand-built oak shelf.'),
+    )
+    expect(fn).toHaveBeenCalledWith(
+      '/api/admin/ai/describe-image',
+      expect.objectContaining({ method: 'POST' }),
+    )
+  })
+
+  it('drafts a description from a freshly uploaded cover photo', async () => {
+    const fn = mockFetch((url, init) => {
+      if (url === '/api/admin/categories') {
+        return jsonResponse(sampleCategories)
+      }
+      if (url === '/api/admin/gallery') {
+        return jsonResponse(sampleGallery)
+      }
+      if (url === '/api/admin/ai/describe-image' && init?.method === 'POST') {
+        expect(init?.body).toBeInstanceOf(FormData)
+        return jsonResponse({ description: 'From the cover.' })
+      }
+      return jsonResponse({}, 404)
+    })
+    render(<GalleryPanel />)
+    await screen.findByText('Oak shelf')
+    fireEvent.change(screen.getByLabelText('Upload a cover photo'), {
+      target: { files: [new File(['x'], 'cover.png')] },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Draft description from photo' }))
+    await waitFor(() => expect(screen.getByLabelText('Description')).toHaveValue('From the cover.'))
+    expect(fn).toHaveBeenCalledWith(
+      '/api/admin/ai/describe-image',
+      expect.objectContaining({ method: 'POST' }),
+    )
+  })
+
+  it('shows a message when no library photo is available', async () => {
+    mockFetch((url) => {
+      if (url === '/api/admin/categories') {
+        return jsonResponse(sampleCategories)
+      }
+      if (url === '/api/admin/gallery') {
+        return jsonResponse(sampleGallery)
+      }
+      if (url === '/api/admin/media') {
+        return jsonResponse([])
+      }
+      return jsonResponse({}, 404)
+    })
+    render(<GalleryPanel />)
+    await screen.findByText('Oak shelf')
+    fireEvent.click(screen.getAllByRole('button', { name: 'Edit' })[0])
+    fireEvent.click(screen.getByRole('button', { name: 'Draft description from photo' }))
+    expect(await screen.findByText('Pick a photo first')).toBeInTheDocument()
+  })
+
+  it('shows a failure message when the description draft fails', async () => {
+    mockFetch((url) => {
+      if (url === '/api/admin/categories') {
+        return jsonResponse(sampleCategories)
+      }
+      if (url === '/api/admin/gallery') {
+        return jsonResponse(sampleGallery)
+      }
+      if (url === '/api/admin/media') {
+        return jsonResponse(sampleMedia)
+      }
+      if (url === '/uploads/a.jpg') {
+        return { ok: true, status: 200, blob: () => Promise.resolve(new Blob(['x'])) } as Response
+      }
+      if (url === '/api/admin/ai/describe-image') {
+        return jsonResponse({}, 500)
+      }
+      return jsonResponse({}, 404)
+    })
+    render(<GalleryPanel />)
+    await screen.findByText('Oak shelf')
+    fireEvent.click(screen.getAllByRole('button', { name: 'Edit' })[0])
+    fireEvent.click(screen.getByRole('button', { name: 'Draft description from photo' }))
+    expect(await screen.findByText('Request failed with status 500')).toBeInTheDocument()
+  })
 })

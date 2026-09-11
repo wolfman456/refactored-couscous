@@ -402,4 +402,73 @@ describe('ArticlesPanel', () => {
       ),
     )
   })
+
+  it('drafts an article with AI and fills the form', async () => {
+    const fn = mockFetch((url, init) => {
+      if (url === '/api/admin/articles') {
+        return jsonResponse(sampleArticles)
+      }
+      if (url === '/api/admin/ai/draft-article' && init?.method === 'POST') {
+        const body = JSON.parse(init?.body as string) as { topic: string; mediaIds: number[] }
+        expect(body.topic).toBe('oak table')
+        expect(body.mediaIds).toEqual([])
+        return jsonResponse({ title: 'AI Built Oak Table', bodyMd: '## Body text' })
+      }
+      return jsonResponse({}, 404)
+    })
+    render(<ArticlesPanel />)
+    await screen.findByText(rowText('First post (first-post)'))
+    fireEvent.change(screen.getByLabelText('AI topic'), { target: { value: 'oak table' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Draft with AI' }))
+    await waitFor(() => expect(screen.getByLabelText('Title')).toHaveValue('AI Built Oak Table'))
+    expect(screen.getByLabelText('Slug')).toHaveValue('ai-built-oak-table')
+    expect(screen.getByLabelText('Body (markdown)')).toHaveValue('## Body text')
+    expect(fn).toHaveBeenCalledWith(
+      '/api/admin/ai/draft-article',
+      expect.objectContaining({ method: 'POST' }),
+    )
+  })
+
+  it('includes selected photos when drafting with AI', async () => {
+    const fn = mockFetch((url, init) => {
+      if (url === '/api/admin/articles') {
+        return jsonResponse([])
+      }
+      if (url === '/api/admin/media') {
+        return jsonResponse(sampleMedia)
+      }
+      if (url === '/api/admin/ai/draft-article' && init?.method === 'POST') {
+        const body = JSON.parse(init?.body as string) as { mediaIds: number[] }
+        expect(body.mediaIds).toEqual([11])
+        return jsonResponse({ title: 'P', bodyMd: 'B' })
+      }
+      return jsonResponse({}, 404)
+    })
+    render(<ArticlesPanel />)
+    await screen.findByText('No articles yet.')
+    await screen.findByAltText('Library photo 11')
+    fireEvent.click(screen.getByAltText('Library photo 11'))
+    fireEvent.click(screen.getByRole('button', { name: 'Draft with AI' }))
+    await waitFor(() => expect(screen.getByLabelText('Title')).toHaveValue('P'))
+    expect(fn).toHaveBeenCalledWith(
+      '/api/admin/ai/draft-article',
+      expect.objectContaining({ method: 'POST' }),
+    )
+  })
+
+  it('shows a failure message when the AI draft fails', async () => {
+    mockFetch((url) => {
+      if (url === '/api/admin/articles') {
+        return jsonResponse([])
+      }
+      if (url === '/api/admin/ai/draft-article') {
+        return jsonResponse({}, 500)
+      }
+      return jsonResponse({}, 404)
+    })
+    render(<ArticlesPanel />)
+    await screen.findByText('No articles yet.')
+    fireEvent.click(screen.getByRole('button', { name: 'Draft with AI' }))
+    expect(await screen.findByText('Request failed with status 500')).toBeInTheDocument()
+  })
 })

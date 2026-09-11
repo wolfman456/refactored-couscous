@@ -3,6 +3,7 @@ import { encodeBasic, setCredential } from './client'
 import { changePassword } from './auth'
 import { fetchGalleryItem } from './gallery'
 import { uploadMedia } from './media'
+import { describeImage, draftArticle } from './ai'
 import { jsonResponse, mockFetch, restoreFetch } from '../test/testUtils'
 
 const item = {
@@ -54,6 +55,35 @@ describe('api module wrappers', () => {
     })
     expect(fn).toHaveBeenCalledWith(
       '/api/admin/change-password',
+      expect.objectContaining({ method: 'POST' }),
+    )
+  })
+
+  it('describeImage posts a FormData file to the admin endpoint', async () => {
+    setCredential(encodeBasic('admin', 'pw'))
+    const fn = mockFetch((_url, init) => {
+      expect(init?.body).toBeInstanceOf(FormData)
+      return jsonResponse({ description: 'desc' })
+    })
+    await expect(describeImage(new File(['x'], 'x.png'))).resolves.toEqual({ description: 'desc' })
+    expect(fn).toHaveBeenCalledWith(
+      '/api/admin/ai/describe-image',
+      expect.objectContaining({ method: 'POST' }),
+    )
+  })
+
+  it('draftArticle posts topic and media ids to the admin endpoint', async () => {
+    setCredential(encodeBasic('admin', 'pw'))
+    const fn = mockFetch((_url, init) => {
+      expect(init?.body).toBe('{"topic":"t","mediaIds":[1,2]}')
+      return jsonResponse({ title: 'T', bodyMd: 'B' })
+    })
+    await expect(draftArticle({ topic: 't', mediaIds: [1, 2] })).resolves.toEqual({
+      title: 'T',
+      bodyMd: 'B',
+    })
+    expect(fn).toHaveBeenCalledWith(
+      '/api/admin/ai/draft-article',
       expect.objectContaining({ method: 'POST' }),
     )
   })
