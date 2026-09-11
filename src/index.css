@@ -428,6 +428,26 @@ h2 {
   gap: 12px;
 }
 
+.ai-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ai-row input {
+  flex: 1;
+}
+
+.ai-row button,
+.ai-inline {
+  font: inherit;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  cursor: pointer;
+}
+
 .form-error {
   color: #b3261e;
   font-weight: 500;
