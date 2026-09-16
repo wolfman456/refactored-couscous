@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { fetchArticle, type Article } from '../api/articles'
 import Markdown from '../components/Markdown'
+import { isVideoUrl } from '../lib/media'
 import { formatDate } from './articleUtils'
 
 export default function ArticlePage() {
@@ -51,15 +52,28 @@ export default function ArticlePage() {
           <time dateTime={article.publishedAt}>{formatDate(article.publishedAt)}</time>
         </p>
       )}
-      {article.featuredImage && (
-        <img src={article.featuredImage} alt={article.title} className="article-hero" />
-      )}
+      {article.featuredImage &&
+        (isVideoUrl(article.featuredImage) ? (
+          <video
+            src={article.featuredImage}
+            controls
+            playsInline
+            aria-label={article.title}
+            className="article-hero"
+          />
+        ) : (
+          <img src={article.featuredImage} alt={article.title} className="article-hero" />
+        ))}
       <Markdown source={article.bodyMd} />
       {article.images.length > 1 && (
         <div className="article-thumbs">
-          {article.images.map((url) => (
-            <img key={url} src={url} alt="" className="article-thumb" />
-          ))}
+          {article.images.map((url) =>
+            isVideoUrl(url) ? (
+              <video key={url} src={url} controls playsInline preload="metadata" className="article-thumb" />
+            ) : (
+              <img key={url} src={url} alt="" className="article-thumb" />
+            ),
+          )}
         </div>
       )}
     </article>

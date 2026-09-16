@@ -1,34 +1,39 @@
 import { useEffect, useState } from 'react'
 import { fetchGallery, type GalleryItem } from '../api/gallery'
 import { fetchCategories, type Category } from '../api/categories'
+import { isVideoUrl } from '../lib/media'
 
 type ActiveTab = 'all' | number
+
+const message = (err: unknown, fallback: string) =>
+  err instanceof Error ? err.message : fallback
 
 export default function GalleryPage() {
   const [items, setItems] = useState<GalleryItem[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [activeTab, setActiveTab] = useState<ActiveTab>('all')
-  const [error, setError] = useState<string | null>(null)
+  const [galleryError, setGalleryError] = useState<string | null>(null)
+  const [categoryError, setCategoryError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    Promise.all([fetchGallery(), fetchCategories()])
-      .then(([galleryItems, tabs]) => {
-        setItems(galleryItems)
-        setCategories(tabs)
-      })
-      .catch((err: unknown) =>
-        setError(err instanceof Error ? err.message : 'Failed to load gallery'),
-      )
-      .finally(() => setLoading(false))
+    void Promise.allSettled([fetchGallery(), fetchCategories()]).then(([gallery, tabs]) => {
+      if (gallery.status === 'fulfilled') {
+        setItems(gallery.value)
+      } else {
+        setGalleryError(message(gallery.reason, 'Failed to load gallery'))
+      }
+      if (tabs.status === 'fulfilled') {
+        setCategories(tabs.value)
+      } else {
+        setCategoryError(message(tabs.reason, 'Failed to load categories'))
+      }
+      setLoading(false)
+    })
   }, [])
 
   if (loading) {
     return <p className="gallery-note">Loading gallery…</p>
-  }
-
-  if (error) {
-    return <p className="gallery-note gallery-error">{error}</p>
   }
 
   const visible =
@@ -38,6 +43,9 @@ export default function GalleryPage() {
 
   return (
     <>
+      {(galleryError || categoryError) && (
+        <p className="gallery-note gallery-error">{galleryError ?? categoryError}</p>
+      )}
       {categories.length > 0 && (
         <nav className="gallery-tabs" aria-label="Gallery categories">
           <button
@@ -72,12 +80,23 @@ export default function GalleryPage() {
           {visible.map((item) => (
             <article key={item.id} className="gallery-card">
               {item.images.length > 0 ? (
-                <img
-                  src={item.images[0]}
-                  alt={item.title}
-                  loading="lazy"
-                  className="gallery-card-img"
-                />
+                isVideoUrl(item.images[0]) ? (
+                  <video
+                    src={item.images[0]}
+                    controls
+                    playsInline
+                    preload="metadata"
+                    aria-label={item.title}
+                    className="gallery-card-img"
+                  />
+                ) : (
+                  <img
+                    src={item.images[0]}
+                    alt={item.title}
+                    loading="lazy"
+                    className="gallery-card-img"
+                  />
+                )
               ) : (
                 <div className="gallery-card-img gallery-card-placeholder" />
               )}
