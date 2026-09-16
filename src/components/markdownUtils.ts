@@ -1,8 +1,23 @@
+const LINK = /\[([^\]]+)\]\(([^)\s]+)\)/g
+
+const SAFE_SCHEME = /^(https?:|mailto:)/i
+
+function safeUrl(url: string): string {
+  const candidate = url.trim().replace(/"/g, '&#34;')
+  if (/^\/\//.test(candidate)) {
+    return '#'
+  }
+  if (/^[a-z][a-z0-9+.-]*:/i.test(candidate) && !SAFE_SCHEME.test(candidate)) {
+    return '#'
+  }
+  return candidate
+}
+
 function inline(text: string): string {
   return text
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*([^*\n]+)\*/g, '<em>$1</em>')
-    .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '<a href="$2">$1</a>')
+    .replace(LINK, (_match, label: string, href: string) => `<a href="${safeUrl(href)}">${label}</a>`)
 }
 
 export function renderMarkdown(md: string): string {
