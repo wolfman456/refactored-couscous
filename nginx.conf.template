@@ -1,17 +1,24 @@
+# Railway container DNS (see /etc/resolv.conf). Re-resolve the upstream hostname
+# on each backend redeploy instead of caching it once at startup.
+resolver fd12::10 valid=5s ipv6=on;
+
 server {
   listen ${PORT};
   server_name _;
   root /usr/share/nginx/html;
   index index.html;
 
+  set $api_host ${API_HOST};
+  set $api_port ${API_PORT};
+
   location /api/ {
-    proxy_pass http://${API_HOST}:${API_PORT};
+    proxy_pass http://$api_host:$api_port;
     proxy_set_header Host $host;
     proxy_set_header X-Forwarded-Proto $scheme;
   }
 
   location /uploads/ {
-    proxy_pass http://${API_HOST}:${API_PORT};
+    proxy_pass http://$api_host:$api_port;
     proxy_set_header Host $host;
     proxy_set_header X-Forwarded-Proto $scheme;
   }
