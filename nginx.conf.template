@@ -1,6 +1,6 @@
 # Railway container DNS (see /etc/resolv.conf). Re-resolve the upstream hostname
 # on each backend redeploy instead of caching it once at startup.
-resolver fd12::10 valid=5s ipv6=on;
+resolver [fd12::10]:53 valid=5s ipv6=on;
 
 server {
   listen ${PORT};
