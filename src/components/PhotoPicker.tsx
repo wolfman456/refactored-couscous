@@ -83,7 +83,11 @@ export default function PhotoPicker({ selectedIds, onToggle }: PhotoPickerProps)
           hidden
           data-testid="picker-file-input"
           onChange={(e) => {
-            void handleUpload(e.target.files?.[0])
+            const files = e.target.files
+            void handleUpload(files?.[0])
+            if (fileInput.current) {
+              fileInput.current.value = ''
+            }
           }}
         />
         <button type="button" onClick={() => fileInput.current?.click()} disabled={uploading}>
@@ -105,7 +109,17 @@ export default function PhotoPicker({ selectedIds, onToggle }: PhotoPickerProps)
                   onClick={() => onToggle(asset.id)}
                   aria-pressed={checked}
                 >
-                  <img src={asset.url} alt={`Library photo ${asset.id}`} />
+                  {asset.assetType === 'VIDEO' ? (
+                    <video
+                      src={asset.url}
+                      controls
+                      playsInline
+                      preload="metadata"
+                      className="picker-cell-media"
+                    />
+                  ) : (
+                    <img src={asset.url} alt={`Library photo ${asset.id}`} className="picker-cell-media" />
+                  )}
                   <span className="picker-cell-check" aria-hidden="true">
                     {checked ? '✓' : ''}
                   </span>

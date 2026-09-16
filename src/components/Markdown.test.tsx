@@ -28,6 +28,27 @@ describe('Markdown', () => {
     expect(screen.getByText('<script>alert(1)</script>')).toBeInTheDocument()
   })
 
+  it('neutralizes dangerous link schemes', () => {
+    const { container } = render(<Markdown source="[bad](javascript:alert(1))" />)
+    const a = container.querySelector('a')
+    expect(a?.getAttribute('href')).toBe('#')
+  })
+
+  it('escapes double quotes in link hrefs (no attribute breakout)', () => {
+    const { container } = render(<Markdown source='[q](https://x.io"onmouseover="alert(1))' />)
+    const a = container.querySelector('a')
+    expect(a?.getAttribute('href')).toBe('https://x.io"onmouseover="alert(1')
+    expect(a?.getAttribute('onmouseover')).toBeNull()
+  })
+
+  it('allows http, https, mailto, and relative links', () => {
+    const { container } = render(
+      <Markdown source="[a](https://x.io) [r](/about) [m](mailto:a@b.c)" />,
+    )
+    const hrefs = Array.from(container.querySelectorAll('a')).map((a) => a.getAttribute('href'))
+    expect(hrefs).toEqual(['https://x.io', '/about', 'mailto:a@b.c'])
+  })
+
   it('closes a list before a heading or paragraph', () => {
     const { container } = render(<Markdown source={'- item\n\nParagraph\n\n- next'} />)
     expect(container.querySelectorAll('ul')).toHaveLength(2)
