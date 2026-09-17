@@ -4,9 +4,16 @@ import { deleteMedia, fetchMedia, uploadMedia, type MediaAsset } from '../api/me
 interface PhotoPickerProps {
   selectedIds: number[]
   onToggle: (id: number) => void
+  backgroundId?: number | null
+  onSetBackground?: (id: number | null) => void
 }
 
-export default function PhotoPicker({ selectedIds, onToggle }: PhotoPickerProps) {
+export default function PhotoPicker({
+  selectedIds,
+  onToggle,
+  backgroundId,
+  onSetBackground,
+}: PhotoPickerProps) {
   const [assets, setAssets] = useState<MediaAsset[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -124,15 +131,36 @@ export default function PhotoPicker({ selectedIds, onToggle }: PhotoPickerProps)
                     {checked ? '✓' : ''}
                   </span>
                 </button>
-                <button
-                  type="button"
-                  className="picker-cell-remove"
-                  onClick={() => {
-                    void handleDelete(asset)
-                  }}
-                >
-                  Remove
-                </button>
+                <div className="picker-cell-actions">
+                  {onSetBackground && (
+                    <button
+                      type="button"
+                      className={`picker-cell-background${
+                        backgroundId === asset.id ? ' picker-cell-background-active' : ''
+                      }`}
+                      aria-pressed={backgroundId === asset.id}
+                      title={
+                        backgroundId === asset.id
+                          ? 'Remove as site background'
+                          : 'Use as the site-wide background'
+                      }
+                      onClick={() =>
+                        onSetBackground(backgroundId === asset.id ? null : asset.id)
+                      }
+                    >
+                      {backgroundId === asset.id ? '✓ Background' : 'Set background'}
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    className="picker-cell-remove"
+                    onClick={() => {
+                      void handleDelete(asset)
+                    }}
+                  >
+                    Remove
+                  </button>
+                </div>
               </div>
             )
           })}

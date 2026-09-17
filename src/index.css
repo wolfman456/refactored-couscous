@@ -565,6 +565,28 @@ h2 {
   cursor: pointer;
 }
 
+.picker-cell-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.picker-cell-background {
+  flex: 1;
+  font: inherit;
+  font-size: 13px;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.picker-cell-background-active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+
 .picker-error {
   display: flex;
   align-items: center;
