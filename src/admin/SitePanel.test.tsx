@@ -1,7 +1,13 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import SitePanel from './SitePanel'
+import { SiteSettingsProvider, useSiteSettings } from '../components/SiteSettingsContext'
 import { jsonResponse, mockFetch, restoreFetch, sampleMedia, sampleSettings } from '../test/testUtils'
+
+function EmailProbe() {
+  const settings = useSiteSettings()
+  return <span data-testid="ctx-email">{settings?.contactEmail ?? 'none'}</span>
+}
 
 describe('SitePanel', () => {
   beforeEach(() => {
@@ -171,5 +177,31 @@ describe('SitePanel', () => {
     expect(screen.getByLabelText('Etsy shop URL')).toHaveValue('')
     expect(screen.getByLabelText('Instagram URL')).toHaveValue('')
     expect(screen.getByLabelText('Facebook URL')).toHaveValue('')
+  })
+
+  it('pushes saved settings into the shared site settings context', async () => {
+    mockFetch((url, init) => {
+      if (url === '/api/admin/settings' && init?.method === 'PUT') {
+        return jsonResponse({ ...sampleSettings, contactEmail: 'new@sixkids.com' })
+      }
+      if (url === '/api/admin/media') {
+        return jsonResponse(sampleMedia)
+      }
+      return jsonResponse(sampleSettings)
+    })
+    render(
+      <SiteSettingsProvider>
+        <SitePanel />
+        <EmailProbe />
+      </SiteSettingsProvider>,
+    )
+    await screen.findByLabelText('Site title')
+    expect(screen.getByTestId('ctx-email')).toHaveTextContent('hello@sixkidscrafts.com')
+    fireEvent.change(screen.getByLabelText('Contact email'), {
+      target: { value: 'new@sixkids.com' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Save settings' }))
+    expect(await screen.findByText('Saved.')).toBeInTheDocument()
+    expect(screen.getByTestId('ctx-email')).toHaveTextContent('new@sixkids.com')
   })
 })

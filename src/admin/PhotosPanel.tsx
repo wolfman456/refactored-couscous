@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import PhotoPicker from '../components/PhotoPicker'
 import { fetchAdminSettings, updateSettings } from '../api/settings'
+import { useSiteSettingsActions } from '../components/SiteSettingsContext'
 
 export default function PhotosPanel() {
+  const { setSettings } = useSiteSettingsActions()
   const [selected, setSelected] = useState<number[]>([])
   const [backgroundId, setBackgroundId] = useState<number | null>(null)
   const [savingBackground, setSavingBackground] = useState(false)
@@ -25,6 +27,7 @@ export default function PhotosPanel() {
     try {
       const settings = await updateSettings({ backgroundMediaId: id })
       setBackgroundId(settings.backgroundMediaId)
+      setSettings(settings)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to set background')
     } finally {

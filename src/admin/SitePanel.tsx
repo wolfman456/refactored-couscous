@@ -5,6 +5,7 @@ import {
   type SiteSettings,
 } from '../api/settings'
 import PhotoPicker from '../components/PhotoPicker'
+import { useSiteSettingsActions } from '../components/SiteSettingsContext'
 
 function toForm(settings: SiteSettings): {
   siteTitle: string
@@ -25,6 +26,7 @@ function toForm(settings: SiteSettings): {
 }
 
 export default function SitePanel() {
+  const { setSettings } = useSiteSettingsActions()
   const [siteTitle, setSiteTitle] = useState('')
   const [backgroundMediaId, setBackgroundMediaId] = useState<number | null>(null)
   const [contactEmail, setContactEmail] = useState('')
@@ -64,7 +66,7 @@ export default function SitePanel() {
     setError(null)
     setSaved(false)
     try {
-      await updateSettings({
+      const updated = await updateSettings({
         siteTitle,
         backgroundMediaId,
         contactEmail,
@@ -72,6 +74,7 @@ export default function SitePanel() {
         instagramUrl,
         facebookUrl,
       })
+      setSettings(updated)
       setSaved(true)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to save settings')
