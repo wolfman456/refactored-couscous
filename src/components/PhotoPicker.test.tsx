@@ -196,4 +196,46 @@ describe('PhotoPicker', () => {
     fireEvent.click(screen.getAllByRole('button', { name: 'Remove' })[0])
     expect(await screen.findByText('Delete failed')).toBeInTheDocument()
   })
+
+  it('only shows background controls when a handler is provided', async () => {
+    fetchMediaMock()
+    const { rerender } = render(<PhotoPicker selectedIds={[]} onToggle={() => undefined} />)
+    await screen.findByAltText('Library photo 11')
+    expect(screen.queryByRole('button', { name: 'Set background' })).not.toBeInTheDocument()
+    rerender(
+      <PhotoPicker
+        selectedIds={[]}
+        onToggle={() => undefined}
+        backgroundId={11}
+        onSetBackground={() => undefined}
+      />,
+    )
+    expect(screen.getByRole('button', { name: '✓ Background' })).toBeInTheDocument()
+    expect(screen.getAllByRole('button', { name: 'Set background' })).toHaveLength(1)
+  })
+
+  it('reports setting and clearing the background', async () => {
+    fetchMediaMock()
+    const calls: (number | null)[] = []
+    const { rerender } = render(
+      <PhotoPicker
+        selectedIds={[]}
+        onToggle={() => undefined}
+        backgroundId={null}
+        onSetBackground={(id) => calls.push(id)}
+      />,
+    )
+    await screen.findByAltText('Library photo 11')
+    fireEvent.click(screen.getAllByRole('button', { name: 'Set background' })[0])
+    rerender(
+      <PhotoPicker
+        selectedIds={[]}
+        onToggle={() => undefined}
+        backgroundId={11}
+        onSetBackground={(id) => calls.push(id)}
+      />,
+    )
+    fireEvent.click(screen.getByRole('button', { name: '✓ Background' }))
+    expect(calls).toEqual([11, null])
+  })
 })
