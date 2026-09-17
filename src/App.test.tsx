@@ -60,4 +60,40 @@ describe('App', () => {
     )
     expect(await screen.findByText('Six Kids Crafts')).toBeInTheDocument()
   })
+
+  it('renders the gallery at /gallery as well as /', async () => {
+    mockFetch((url) => {
+      if (url === '/api/categories') {
+        return jsonResponse(sampleCategories)
+      }
+      if (url === '/api/settings') {
+        return jsonResponse({})
+      }
+      return jsonResponse(sampleGallery)
+    })
+    render(
+      <MemoryRouter initialEntries={['/gallery']}>
+        <App />
+      </MemoryRouter>,
+    )
+    expect(await screen.findByText('Oak shelf')).toBeInTheDocument()
+  })
+
+  it('redirects unknown paths back to the gallery', async () => {
+    mockFetch((url) => {
+      if (url === '/api/categories') {
+        return jsonResponse(sampleCategories)
+      }
+      if (url === '/api/settings') {
+        return jsonResponse({})
+      }
+      return jsonResponse(sampleGallery)
+    })
+    render(
+      <MemoryRouter initialEntries={['/does-not-exist']}>
+        <App />
+      </MemoryRouter>,
+    )
+    expect(await screen.findByText('Oak shelf')).toBeInTheDocument()
+  })
 })
