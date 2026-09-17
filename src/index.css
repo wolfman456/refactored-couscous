@@ -75,12 +75,9 @@ h2 {
 .site-main {
   flex: 1;
   width: 1120px;
-  max-width: calc(100% - 48px);
-  margin: 24px auto 32px;
+  max-width: 100%;
+  margin: 0 auto;
   padding: 32px 24px 64px;
-  background: var(--surface);
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
 }
 
 .gallery-grid {
@@ -138,7 +135,13 @@ h2 {
 .gallery-note {
   text-align: center;
   color: var(--text);
-  padding: 48px 0;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 16px 24px;
+  background: var(--surface);
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .gallery-error {
@@ -148,6 +151,11 @@ h2 {
 .contact {
   max-width: 640px;
   margin: 0 auto;
+  width: fit-content;
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 16px 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .contact h1 {
@@ -618,4 +626,24 @@ h2 {
   background-position: center;
   background-size: cover;
   background-attachment: fixed;
+}
+
+/* Text that sits directly on the background photo gets its own white box so it
+   stays readable without covering the whole photo. */
+.articles-list > h1,
+.gallery-note-back,
+.article-title,
+.article-date,
+.article > .markdown,
+.admin-bar,
+.panel-hint,
+.picker-note,
+.picker-empty,
+.picker-count {
+  width: fit-content;
+  max-width: 100%;
+  background: var(--surface);
+  border-radius: 10px;
+  padding: 8px 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
