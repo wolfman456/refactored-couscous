@@ -75,9 +75,12 @@ h2 {
 .site-main {
   flex: 1;
   width: 1120px;
-  max-width: 100%;
-  margin: 0 auto;
+  max-width: calc(100% - 48px);
+  margin: 24px auto 32px;
   padding: 32px 24px 64px;
+  background: var(--surface);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
 }
 
 .gallery-grid {
@@ -93,6 +96,7 @@ h2 {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .gallery-card-img {
@@ -201,6 +205,7 @@ h2 {
   border-radius: 12px;
   overflow: hidden;
   margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .article-card-link {
@@ -345,6 +350,7 @@ h2 {
   border-radius: 8px;
   margin-bottom: 8px;
   background: var(--surface);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .admin-list-label {
@@ -384,6 +390,7 @@ h2 {
   background: var(--surface);
   display: grid;
   gap: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .admin-form h3 {
