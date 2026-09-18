@@ -14,6 +14,10 @@ ecommerce.**
 - `/` — Gallery grid with category tabs ("All" + each category). Reads
   `GET /api/gallery` and `GET /api/categories`; renders cards (image, title,
   description, category). Empty/error/loading states handled.
+- `/gallery/:id` — Gallery piece detail. Reads `GET /api/gallery/{id}` and shows
+  every attached photo (thumbnail `src`/`srcSet` per photo, videos as `<video>`),
+  the title, category and description, plus a back link. Empty/error/not-found
+  states handled.
 - `/articles` — Article list. Reads `GET /api/articles`; each card links to the
   article's detail route.
 - `/articles/:slug` — Article detail. Reads `GET /api/articles/{slug}`, renders
@@ -54,6 +58,7 @@ src/
     PhotoPicker.tsx          shared photo-library grid (upload, remove, select)
   pages/
     GalleryPage.tsx
+    GalleryItemPage.tsx   piece detail: all photos, video, back link
     ArticlesPage.tsx      exports formatDate()
     ArticlePage.tsx
     ContactPage.tsx

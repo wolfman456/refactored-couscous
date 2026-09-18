@@ -96,6 +96,13 @@ h2 {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
+.gallery-card-link {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+}
+
 .gallery-card-img {
   width: 100%;
   aspect-ratio: 4 / 3;
@@ -146,6 +153,40 @@ h2 {
 
 .gallery-error {
   color: #b3261e;
+}
+
+.gallery-detail {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.gallery-detail-title {
+  font-size: 34px;
+}
+
+.gallery-detail-category {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.gallery-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.gallery-detail-media {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 10px;
+  display: block;
+  background: var(--accent-bg);
 }
 
 .contact {
@@ -632,6 +673,9 @@ h2 {
    stays readable without covering the whole photo. */
 .articles-list > h1,
 .gallery-note-back,
+.gallery-detail-title,
+.gallery-detail-category,
+.gallery-detail-description,
 .article-title,
 .article-date,
 .article > .markdown,
