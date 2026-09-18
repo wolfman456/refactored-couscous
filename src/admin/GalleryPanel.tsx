@@ -167,7 +167,11 @@ export default function GalleryPanel() {
             <li key={item.id} className="admin-list-row">
               <span className="admin-list-label">
                 {item.images.length > 0 && (
-                  <img src={item.images[0]} alt="" className="admin-list-thumb" />
+                  <img
+                    src={item.thumbnails?.[0] ?? item.images[0]}
+                    alt=""
+                    className="admin-list-thumb"
+                  />
                 )}
                 {item.title}
                 {!item.published && <span className="draft-badge">draft</span>}

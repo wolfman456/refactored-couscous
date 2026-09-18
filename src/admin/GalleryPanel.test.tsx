@@ -36,6 +36,23 @@ describe('GalleryPanel', () => {
     expect(screen.getByRole('heading', { name: 'Add a piece' })).toBeInTheDocument()
   })
 
+  it('uses the thumbnail for the list preview when available', async () => {
+    mockFetch((url) => {
+      if (url === '/api/admin/categories') {
+        return jsonResponse(sampleCategories)
+      }
+      if (url === '/api/admin/gallery') {
+        return jsonResponse([{ ...sampleGallery[0], thumbnails: ['/uploads/a_thumb.jpg'] }])
+      }
+      return jsonResponse({}, 404)
+    })
+    const { container } = render(<GalleryPanel />)
+    await screen.findByText('Oak shelf')
+    expect(container.querySelector('img.admin-list-thumb')?.getAttribute('src')).toBe(
+      '/uploads/a_thumb.jpg',
+    )
+  })
+
   it('shows the empty state', async () => {
     mockFetch((url) => {
       if (url === '/api/admin/categories') {

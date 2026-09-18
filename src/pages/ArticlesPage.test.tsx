@@ -62,6 +62,27 @@ describe('ArticlesPage', () => {
     expect(img?.getAttribute('src')).toBe('/uploads/hero.jpg')
   })
 
+  it('prefers the featured thumbnail for the card image', async () => {
+    mockFetch(() =>
+      jsonResponse([
+        {
+          ...sampleArticles[0],
+          featuredImage: '/uploads/hero.jpg',
+          featuredThumbnail: '/uploads/hero_thumb.jpg',
+        },
+      ]),
+    )
+    const { container } = render(
+      <MemoryRouter>
+        <ArticlesPage />
+      </MemoryRouter>,
+    )
+    await screen.findByRole('link', { name: /First post/ })
+    const img = container.querySelector('img.article-card-img')
+    expect(img?.getAttribute('src')).toBe('/uploads/hero_thumb.jpg')
+    expect(img?.getAttribute('srcset')).toBe('/uploads/hero_thumb.jpg 480w, /uploads/hero.jpg 2000w')
+  })
+
   it('surfaces a load failure with a non-Error', async () => {
     mockFetch(() => {
       throw 'boom'

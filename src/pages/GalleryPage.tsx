@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { fetchGallery, type GalleryItem } from '../api/gallery'
 import { fetchCategories, type Category } from '../api/categories'
-import { isVideoUrl } from '../lib/media'
+import { imageSrcSet, isVideoUrl } from '../lib/media'
 
 type ActiveTab = 'all' | number
 
@@ -91,7 +91,9 @@ export default function GalleryPage() {
                   />
                 ) : (
                   <img
-                    src={item.images[0]}
+                    src={item.thumbnails?.[0] ?? item.images[0]}
+                    srcSet={imageSrcSet(item.images[0], item.thumbnails?.[0])}
+                    sizes="(max-width: 700px) 100vw, 320px"
                     alt={item.title}
                     loading="lazy"
                     className="gallery-card-img"
