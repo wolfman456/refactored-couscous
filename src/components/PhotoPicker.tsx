@@ -125,7 +125,7 @@ export default function PhotoPicker({
                       className="picker-cell-media"
                     />
                   ) : (
-                    <img src={asset.url} alt={`Library photo ${asset.id}`} className="picker-cell-media" />
+                    <img src={asset.thumbnailUrl ?? asset.url} alt={`Library photo ${asset.id}`} className="picker-cell-media" />
                   )}
                   <span className="picker-cell-check" aria-hidden="true">
                     {checked ? '✓' : ''}

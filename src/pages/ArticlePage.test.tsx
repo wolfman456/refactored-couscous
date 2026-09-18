@@ -85,4 +85,19 @@ describe('ArticlePage', () => {
     const thumbs = container.querySelectorAll('img.article-thumb')
     expect(thumbs).toHaveLength(2)
   })
+
+  it('uses thumbnails for the photo strip when available', async () => {
+    mockFetch(() =>
+      jsonResponse({
+        ...sampleArticles[0],
+        images: ['/uploads/a.jpg', '/uploads/b.jpg'],
+        thumbnails: ['/uploads/a_thumb.jpg', '/uploads/b_thumb.jpg'],
+      }),
+    )
+    const { container } = renderAt('first-post')
+    await screen.findByRole('heading', { name: 'First post' })
+    const thumbs = container.querySelectorAll('img.article-thumb')
+    expect(thumbs[0].getAttribute('src')).toBe('/uploads/a_thumb.jpg')
+    expect(thumbs[1].getAttribute('src')).toBe('/uploads/b_thumb.jpg')
+  })
 })

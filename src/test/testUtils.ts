@@ -91,7 +91,7 @@ export const sampleArticles = [
 ]
 
 export const sampleMedia = [
-  { id: 11, assetType: 'IMAGE', url: '/uploads/a.jpg', contentType: 'image/jpeg', sizeBytes: 10, uploadedAt: '2026-01-01T00:00:00Z' },
+  { id: 11, assetType: 'IMAGE', url: '/uploads/a.jpg', thumbnailUrl: '/uploads/a_thumb.jpg', contentType: 'image/jpeg', sizeBytes: 10, uploadedAt: '2026-01-01T00:00:00Z' },
   { id: 12, assetType: 'IMAGE', url: '/uploads/b.jpg', contentType: 'image/jpeg', sizeBytes: 20, uploadedAt: '2026-01-02T00:00:00Z' },
 ]
 
