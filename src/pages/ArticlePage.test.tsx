@@ -27,6 +27,7 @@ describe('ArticlePage', () => {
     renderAt('first-post')
     expect(screen.getByText('Loading article…')).toBeInTheDocument()
     expect(await screen.findByRole('heading', { name: 'First post' })).toBeInTheDocument()
+    expect(document.title).toBe('First post · Six Kids Crafts')
     expect(screen.getByRole('link', { name: '← All articles' })).toBeInTheDocument()
     expect(screen.getByText('Hello')).toBeInTheDocument()
     expect(screen.getByText('Hello').tagName).toBe('H1')

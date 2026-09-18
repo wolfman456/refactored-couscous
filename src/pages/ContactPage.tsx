@@ -1,5 +1,6 @@
 import { useSiteSettings } from '../components/SiteSettingsContext'
 import type { SiteSettings } from '../api/settings'
+import { useSeo } from '../lib/seo'
 
 interface ContactLink {
   key: string
@@ -25,6 +26,10 @@ function contactLinks(settings: SiteSettings): ContactLink[] {
 }
 
 export default function ContactPage() {
+  useSeo({
+    title: 'Contact · Six Kids Crafts',
+    description: 'Questions, custom commissions or just want to say hello? Get in touch with Six Kids Crafts.',
+  })
   const settings = useSiteSettings()
   const links = settings ? contactLinks(settings) : []
 

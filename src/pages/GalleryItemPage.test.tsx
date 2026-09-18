@@ -35,6 +35,7 @@ describe('GalleryItemPage', () => {
     expect(await screen.findByRole('heading', { name: 'Oak shelf' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: '← All pieces' })).toBeInTheDocument()
     expect(screen.getByText('A small oak shelf.')).toBeInTheDocument()
+    expect(document.title).toBe('Oak shelf · Six Kids Crafts')
     const imgs = container.querySelectorAll('img.gallery-detail-media')
     expect(imgs).toHaveLength(2)
     expect(imgs[0].getAttribute('src')).toBe('/uploads/a_thumb.jpg')
