@@ -7,6 +7,7 @@ import ArticlesPanel from '../admin/ArticlesPanel'
 import TabsPanel from '../admin/TabsPanel'
 import SitePanel from '../admin/SitePanel'
 import PasswordPanel from '../admin/PasswordPanel'
+import { useSeo } from '../lib/seo'
 
 type Panel = 'photos' | 'gallery' | 'articles' | 'tabs' | 'site' | 'account'
 
@@ -20,6 +21,7 @@ const PANELS: { key: Panel; label: string }[] = [
 ]
 
 export default function AdminPage() {
+  useSeo({ title: 'Content manager · Six Kids Crafts', noindex: true })
   const [authed, setAuthed] = useState(hasCredential())
   const [panel, setPanel] = useState<Panel>('photos')
 

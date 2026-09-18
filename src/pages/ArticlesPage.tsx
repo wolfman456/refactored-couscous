@@ -2,9 +2,14 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { fetchArticles, type ArticleSummary } from '../api/articles'
 import { imageSrcSet } from '../lib/media'
+import { useSeo } from '../lib/seo'
 import { formatDate } from './articleUtils'
 
 export default function ArticlesPage() {
+  useSeo({
+    title: 'Notes from the shop · Six Kids Crafts',
+    description: 'Stories, tips and updates from the Six Kids Crafts woodworking shop.',
+  })
   const [articles, setArticles] = useState<ArticleSummary[]>([])
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)

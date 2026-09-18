@@ -2,12 +2,21 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { fetchGalleryItem, type GalleryItem } from '../api/gallery'
 import { imageSrcSet, isVideoUrl } from '../lib/media'
+import { metaDescription, useSeo } from '../lib/seo'
+
+const FALLBACK_DESCRIPTION = 'A handcrafted piece by Six Kids Crafts.'
 
 export default function GalleryItemPage() {
   const { id } = useParams()
   const [item, setItem] = useState<GalleryItem | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(!!id)
+
+  useSeo({
+    title: item ? `${item.title} · Six Kids Crafts` : 'Piece · Six Kids Crafts',
+    description: item ? metaDescription(item.description, FALLBACK_DESCRIPTION) : FALLBACK_DESCRIPTION,
+    image: item?.images[0],
+  })
 
   useEffect(() => {
     if (!id) {
