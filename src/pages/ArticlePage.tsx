@@ -67,11 +67,11 @@ export default function ArticlePage() {
       <Markdown source={article.bodyMd} />
       {article.images.length > 1 && (
         <div className="article-thumbs">
-          {article.images.map((url) =>
+          {article.images.map((url, index) =>
             isVideoUrl(url) ? (
               <video key={url} src={url} controls playsInline preload="metadata" className="article-thumb" />
             ) : (
-              <img key={url} src={url} alt="" className="article-thumb" />
+              <img key={url} src={article.thumbnails?.[index] ?? url} alt="" className="article-thumb" />
             ),
           )}
         </div>

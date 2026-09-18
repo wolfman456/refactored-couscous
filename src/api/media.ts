@@ -4,6 +4,7 @@ export interface MediaAsset {
   id: number
   assetType: 'IMAGE' | 'VIDEO'
   url: string
+  thumbnailUrl?: string | null
   contentType: string | null
   sizeBytes: number | null
   uploadedAt: string

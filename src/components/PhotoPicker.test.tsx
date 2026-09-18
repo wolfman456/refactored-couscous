@@ -34,6 +34,15 @@ describe('PhotoPicker', () => {
     expect(screen.getAllByRole('button', { name: /Library photo/ })).toHaveLength(2)
   })
 
+  it('shows thumbnails in the library grid when available', async () => {
+    fetchMediaMock()
+    render(<PhotoPicker selectedIds={[]} onToggle={() => undefined} />)
+    expect((await screen.findByAltText('Library photo 11')).getAttribute('src')).toBe(
+      '/uploads/a_thumb.jpg',
+    )
+    expect(screen.getByAltText('Library photo 12').getAttribute('src')).toBe('/uploads/b.jpg')
+  })
+
   it('shows an empty message when the library is empty', async () => {
     fetchMediaMock([])
     render(<PhotoPicker selectedIds={[]} onToggle={() => undefined} />)

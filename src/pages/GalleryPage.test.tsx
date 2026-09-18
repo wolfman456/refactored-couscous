@@ -75,4 +75,23 @@ describe('GalleryPage', () => {
     render(<GalleryPage />)
     expect(await screen.findByText('Failed to load gallery')).toBeInTheDocument()
   })
+
+  it('prefers the thumbnail for grid cards and falls back to the full image', async () => {
+    mockFetch((url) => {
+      if (url === '/api/categories') {
+        return jsonResponse(sampleCategories)
+      }
+      return jsonResponse([
+        { ...sampleGallery[0], thumbnails: ['/uploads/a_thumb.jpg'] },
+        { ...sampleGallery[1], images: ['/uploads/b.jpg'], thumbnails: [] },
+      ])
+    })
+    const { container } = render(<GalleryPage />)
+    await screen.findByText('Oak shelf')
+    const imgs = container.querySelectorAll('img.gallery-card-img')
+    expect(imgs[0].getAttribute('src')).toBe('/uploads/a_thumb.jpg')
+    expect(imgs[0].getAttribute('srcset')).toBe('/uploads/a_thumb.jpg 480w, /uploads/a.jpg 2000w')
+    expect(imgs[1].getAttribute('src')).toBe('/uploads/b.jpg')
+    expect(imgs[1].getAttribute('srcset')).toBeNull()
+  })
 })

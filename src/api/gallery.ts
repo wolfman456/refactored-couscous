@@ -10,6 +10,7 @@ export interface GalleryItem {
   published: boolean
   createdAt: string
   images: string[]
+  thumbnails?: string[]
   mediaIds: number[]
 }
 

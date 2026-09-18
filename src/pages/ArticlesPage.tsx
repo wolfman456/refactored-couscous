@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { fetchArticles, type ArticleSummary } from '../api/articles'
+import { imageSrcSet } from '../lib/media'
 import { formatDate } from './articleUtils'
 
 export default function ArticlesPage() {
@@ -36,7 +37,13 @@ export default function ArticlesPage() {
         <article key={article.id} className="article-card">
           <Link to={`/articles/${article.slug}`} className="article-card-link">
             {article.featuredImage && (
-              <img src={article.featuredImage} alt="" className="article-card-img" />
+              <img
+                src={article.featuredThumbnail ?? article.featuredImage}
+                srcSet={imageSrcSet(article.featuredImage, article.featuredThumbnail)}
+                sizes="(max-width: 700px) 100vw, 320px"
+                alt=""
+                className="article-card-img"
+              />
             )}
             <div className="article-card-body">
               <h2>{article.title}</h2>

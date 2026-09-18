@@ -6,7 +6,9 @@ export interface ArticleSummary {
   slug: string
   publishedAt: string | null
   featuredImage: string | null
+  featuredThumbnail?: string | null
   images: string[]
+  thumbnails?: string[]
 }
 
 export interface Article extends ArticleSummary {
