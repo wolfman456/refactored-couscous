@@ -1,5 +1,6 @@
 import { Link, Navigate, Route, Routes } from 'react-router-dom'
 import GalleryPage from './pages/GalleryPage'
+import GalleryItemPage from './pages/GalleryItemPage'
 import ArticlesPage from './pages/ArticlesPage'
 import ArticlePage from './pages/ArticlePage'
 import ContactPage from './pages/ContactPage'
@@ -27,6 +28,7 @@ function Shell() {
         <Routes>
           <Route path="/" element={<GalleryPage />} />
           <Route path="/gallery" element={<GalleryPage />} />
+          <Route path="/gallery/:id" element={<GalleryItemPage />} />
           <Route path="/articles" element={<ArticlesPage />} />
           <Route path="/articles/:slug" element={<ArticlePage />} />
           <Route path="/contact" element={<ContactPage />} />
