@@ -1,7 +1,10 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { fireEvent, render, screen } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import GalleryPage from './GalleryPage'
 import { jsonResponse, mockFetch, restoreFetch, sampleCategories, sampleGallery } from '../test/testUtils'
+
+const renderGallery = () => render(<MemoryRouter><GalleryPage /></MemoryRouter>)
 
 describe('GalleryPage', () => {
   beforeEach(() => {
@@ -15,7 +18,7 @@ describe('GalleryPage', () => {
       }
       return jsonResponse(sampleGallery)
     })
-    render(<GalleryPage />)
+    renderGallery()
     expect(screen.getByText('Loading gallery…')).toBeInTheDocument()
     expect(await screen.findByText('Oak shelf')).toBeInTheDocument()
     expect(screen.getByText('Walnut box')).toBeInTheDocument()
@@ -29,7 +32,7 @@ describe('GalleryPage', () => {
       }
       return jsonResponse(sampleGallery)
     })
-    render(<GalleryPage />)
+    renderGallery()
     await screen.findByText('Oak shelf')
     fireEvent.click(screen.getByRole('button', { name: 'Shelves' }))
     expect(screen.getByText('Oak shelf')).toBeInTheDocument()
@@ -45,13 +48,13 @@ describe('GalleryPage', () => {
       }
       return jsonResponse([])
     })
-    render(<GalleryPage />)
+    renderGallery()
     expect(await screen.findByText('No pieces posted yet — check back soon.')).toBeInTheDocument()
   })
 
   it('shows the fetch error message', async () => {
     mockFetch(() => jsonResponse({}, 500))
-    render(<GalleryPage />)
+    renderGallery()
     expect(await screen.findByText('Request failed with status 500')).toBeInTheDocument()
   })
 
@@ -62,7 +65,7 @@ describe('GalleryPage', () => {
       }
       return jsonResponse(sampleGallery)
     })
-    render(<GalleryPage />)
+    renderGallery()
     await screen.findByText('Oak shelf')
     fireEvent.click(screen.getByRole('button', { name: 'Empty tab' }))
     expect(screen.getByText('Nothing in this category yet.')).toBeInTheDocument()
@@ -72,7 +75,7 @@ describe('GalleryPage', () => {
     mockFetch(() => {
       throw 'boom'
     })
-    render(<GalleryPage />)
+    renderGallery()
     expect(await screen.findByText('Failed to load gallery')).toBeInTheDocument()
   })
 
@@ -86,12 +89,25 @@ describe('GalleryPage', () => {
         { ...sampleGallery[1], images: ['/uploads/b.jpg'], thumbnails: [] },
       ])
     })
-    const { container } = render(<GalleryPage />)
+    const { container } = renderGallery()
     await screen.findByText('Oak shelf')
     const imgs = container.querySelectorAll('img.gallery-card-img')
     expect(imgs[0].getAttribute('src')).toBe('/uploads/a_thumb.jpg')
     expect(imgs[0].getAttribute('srcset')).toBe('/uploads/a_thumb.jpg 480w, /uploads/a.jpg 2000w')
     expect(imgs[1].getAttribute('src')).toBe('/uploads/b.jpg')
     expect(imgs[1].getAttribute('srcset')).toBeNull()
+  })
+
+  it('links every card to its detail page', async () => {
+    mockFetch((url) => {
+      if (url === '/api/categories') {
+        return jsonResponse(sampleCategories)
+      }
+      return jsonResponse(sampleGallery)
+    })
+    renderGallery()
+    await screen.findByText('Oak shelf')
+    expect(screen.getByRole('link', { name: /Oak shelf/ })).toHaveAttribute('href', '/gallery/1')
+    expect(screen.getByRole('link', { name: /Walnut box/ })).toHaveAttribute('href', '/gallery/2')
   })
 })

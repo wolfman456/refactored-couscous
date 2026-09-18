@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { fetchGallery, type GalleryItem } from '../api/gallery'
 import { fetchCategories, type Category } from '../api/categories'
 import { imageSrcSet, isVideoUrl } from '../lib/media'
@@ -79,36 +80,38 @@ export default function GalleryPage() {
         <section className="gallery-grid">
           {visible.map((item) => (
             <article key={item.id} className="gallery-card">
-              {item.images.length > 0 ? (
-                isVideoUrl(item.images[0]) ? (
-                  <video
-                    src={item.images[0]}
-                    controls
-                    playsInline
-                    preload="metadata"
-                    aria-label={item.title}
-                    className="gallery-card-img"
-                  />
+              <Link to={`/gallery/${item.id}`} className="gallery-card-link">
+                {item.images.length > 0 ? (
+                  isVideoUrl(item.images[0]) ? (
+                    <video
+                      src={item.images[0]}
+                      controls
+                      playsInline
+                      preload="metadata"
+                      aria-label={item.title}
+                      className="gallery-card-img"
+                    />
+                  ) : (
+                    <img
+                      src={item.thumbnails?.[0] ?? item.images[0]}
+                      srcSet={imageSrcSet(item.images[0], item.thumbnails?.[0])}
+                      sizes="(max-width: 700px) 100vw, 320px"
+                      alt={item.title}
+                      loading="lazy"
+                      className="gallery-card-img"
+                    />
+                  )
                 ) : (
-                  <img
-                    src={item.thumbnails?.[0] ?? item.images[0]}
-                    srcSet={imageSrcSet(item.images[0], item.thumbnails?.[0])}
-                    sizes="(max-width: 700px) 100vw, 320px"
-                    alt={item.title}
-                    loading="lazy"
-                    className="gallery-card-img"
-                  />
-                )
-              ) : (
-                <div className="gallery-card-img gallery-card-placeholder" />
-              )}
-              <div className="gallery-card-body">
-                <h2>{item.title}</h2>
-                {item.categoryName && (
-                  <span className="gallery-card-category">{item.categoryName}</span>
+                  <div className="gallery-card-img gallery-card-placeholder" />
                 )}
-                {item.description && <p>{item.description}</p>}
-              </div>
+                <div className="gallery-card-body">
+                  <h2>{item.title}</h2>
+                  {item.categoryName && (
+                    <span className="gallery-card-category">{item.categoryName}</span>
+                  )}
+                  {item.description && <p>{item.description}</p>}
+                </div>
+              </Link>
             </article>
           ))}
         </section>
