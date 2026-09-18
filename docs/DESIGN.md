@@ -56,6 +56,9 @@ src/
     SiteSettingsContext.tsx  loads GET /api/settings; settings drive shell
     Markdown.tsx             tiny renderer (bold/italic/links/h1-h3/lists)
     PhotoPicker.tsx          shared photo-library grid (upload, remove, select)
+  lib/
+    media.ts             isVideoUrl(), imageSrcSet()
+    seo.ts               useSeo(), metaDescription(), plainText()
   pages/
     GalleryPage.tsx
     GalleryItemPage.tsx   piece detail: all photos, video, back link
@@ -88,6 +91,24 @@ src/
   `src/test/testUtils.ts` (`mockFetch`, `jsonResponse`, `noContent`, samples,
   `rowText` — a `span`-only text matcher used to avoid container-row false
   matches). Coverage gate ≥ 90% on statements/branches/functions/lines.
+
+## SEO & meta
+
+- `index.html` holds sensible static defaults (title, description, canonical,
+  Open Graph/Twitter tags, theme-color) so non-JS crawlers and link unfurlers get
+  something useful.
+- `src/lib/seo.ts` exports `useSeo({ title, description, image, type, noindex })`
+  plus `metaDescription()` and `plainText()` helpers. Each public page calls
+  `useSeo` to set a unique `<title>`, description, canonical URL and
+  `og:`/`twitter:` tags; `/admin` is `noindex, nofollow`.
+- Social images are made absolute; a custom image gets
+  `twitter:card=summary_large_image`, otherwise the default
+  `/apple-touch-icon.png` + `summary` is used.
+- `public/robots.txt` allows the site, disallows `/admin` and points at
+  `public/sitemap.xml`.
+- Note: the site is a client-rendered SPA, so per-page tags are applied in the
+  browser. The static `sitemap.xml` currently lists only the fixed routes —
+  gallery pieces and articles are added to it as the content grows.
 
 ## Reusable UI
 

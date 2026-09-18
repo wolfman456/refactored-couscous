@@ -3,13 +3,25 @@ import { Link, useParams } from 'react-router-dom'
 import { fetchArticle, type Article } from '../api/articles'
 import Markdown from '../components/Markdown'
 import { isVideoUrl } from '../lib/media'
+import { metaDescription, plainText, useSeo } from '../lib/seo'
 import { formatDate } from './articleUtils'
+
+const FALLBACK_DESCRIPTION = 'A note from the Six Kids Crafts woodworking shop.'
 
 export default function ArticlePage() {
   const { slug } = useParams()
   const [article, setArticle] = useState<Article | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(!!slug)
+
+  useSeo({
+    title: article ? `${article.title} · Six Kids Crafts` : 'Article · Six Kids Crafts',
+    description: article
+      ? metaDescription(plainText(article.bodyMd), FALLBACK_DESCRIPTION)
+      : FALLBACK_DESCRIPTION,
+    image: article?.featuredImage ?? article?.images[0],
+    type: 'article',
+  })
 
   useEffect(() => {
     if (!slug) {

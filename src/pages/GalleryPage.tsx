@@ -3,13 +3,18 @@ import { Link } from 'react-router-dom'
 import { fetchGallery, type GalleryItem } from '../api/gallery'
 import { fetchCategories, type Category } from '../api/categories'
 import { imageSrcSet, isVideoUrl } from '../lib/media'
+import { useSeo } from '../lib/seo'
 
 type ActiveTab = 'all' | number
+
+const GALLERY_DESCRIPTION =
+  'Browse handcrafted wood décor, signs, cutting boards and custom furniture made by Six Kids Crafts.'
 
 const message = (err: unknown, fallback: string) =>
   err instanceof Error ? err.message : fallback
 
 export default function GalleryPage() {
+  useSeo({ title: 'Gallery · Six Kids Crafts', description: GALLERY_DESCRIPTION })
   const [items, setItems] = useState<GalleryItem[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [activeTab, setActiveTab] = useState<ActiveTab>('all')
