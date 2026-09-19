@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { fetchGalleryItem, type GalleryItem } from '../api/gallery'
+import Lightbox from '../components/Lightbox'
 import { imageSrcSet, isVideoUrl } from '../lib/media'
 import { metaDescription, useSeo } from '../lib/seo'
 
@@ -11,6 +12,7 @@ export default function GalleryItemPage() {
   const [item, setItem] = useState<GalleryItem | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(!!id)
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
 
   useSeo({
     title: item ? `${item.title} · Six Kids Crafts` : 'Piece · Six Kids Crafts',
@@ -48,6 +50,47 @@ export default function GalleryItemPage() {
     )
   }
 
+  const photoUrls = item.images.filter((url) => !isVideoUrl(url))
+
+  const renderMedia = () => {
+    let photoIndex = 0
+    return item.images.map((url) => {
+      if (isVideoUrl(url)) {
+        return (
+          <video
+            key={url}
+            src={url}
+            controls
+            playsInline
+            preload="metadata"
+            aria-label={item.title}
+            className="gallery-detail-media"
+          />
+        )
+      }
+      const current = photoIndex
+      photoIndex += 1
+      return (
+        <button
+          key={url}
+          type="button"
+          className="gallery-detail-photo-btn"
+          aria-label={`Enlarge photo ${current + 1} of ${item.title}`}
+          onClick={() => setLightboxIndex(current)}
+        >
+          <img
+            src={item.thumbnails?.[current] ?? url}
+            srcSet={imageSrcSet(url, item.thumbnails?.[current])}
+            sizes="(max-width: 700px) 100vw, 360px"
+            alt={`${item.title} photo ${current + 1}`}
+            loading="lazy"
+            className="gallery-detail-media"
+          />
+        </button>
+      )
+    })
+  }
+
   return (
     <article className="gallery-detail">
       <p className="gallery-note-back">
@@ -59,31 +102,15 @@ export default function GalleryItemPage() {
       {item.images.length === 0 ? (
         <p className="gallery-note">No photos for this piece yet.</p>
       ) : (
-        <div className="gallery-detail-grid">
-          {item.images.map((url, index) =>
-            isVideoUrl(url) ? (
-              <video
-                key={url}
-                src={url}
-                controls
-                playsInline
-                preload="metadata"
-                aria-label={item.title}
-                className="gallery-detail-media"
-              />
-            ) : (
-              <img
-                key={url}
-                src={item.thumbnails?.[index] ?? url}
-                srcSet={imageSrcSet(url, item.thumbnails?.[index])}
-                sizes="(max-width: 700px) 100vw, 360px"
-                alt={`${item.title} photo ${index + 1}`}
-                loading="lazy"
-                className="gallery-detail-media"
-              />
-            ),
-          )}
-        </div>
+        <div className="gallery-detail-grid">{renderMedia()}</div>
+      )}
+      {lightboxIndex !== null && (
+        <Lightbox
+          images={photoUrls}
+          title={item.title}
+          initialIndex={lightboxIndex}
+          onClose={() => setLightboxIndex(null)}
+        />
       )}
     </article>
   )

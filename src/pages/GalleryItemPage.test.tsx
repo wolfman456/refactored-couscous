@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import GalleryItemPage from './GalleryItemPage'
 import { jsonResponse, mockFetch, restoreFetch, sampleGallery } from '../test/testUtils'
@@ -101,5 +101,55 @@ describe('GalleryItemPage', () => {
     })
     renderAt('1')
     expect(await screen.findByText('Failed to load piece')).toBeInTheDocument()
+  })
+
+  it('opens the lightbox with the full-size image when a photo is clicked', async () => {
+    mockFetch(() => jsonResponse(sampleItem))
+    const { container } = renderAt('1')
+    await screen.findByRole('heading', { name: 'Oak shelf' })
+    fireEvent.click(screen.getByRole('button', { name: 'Enlarge photo 1 of Oak shelf' }))
+    const dialog = await screen.findByRole('dialog', { name: 'Oak shelf' })
+    expect(dialog).toBeInTheDocument()
+    expect(container.querySelector('.lightbox-media')?.getAttribute('src')).toBe('/uploads/a.jpg')
+  })
+
+  it('closes the lightbox via the close button', async () => {
+    mockFetch(() => jsonResponse(sampleItem))
+    renderAt('1')
+    await screen.findByRole('heading', { name: 'Oak shelf' })
+    fireEvent.click(screen.getByRole('button', { name: 'Enlarge photo 1 of Oak shelf' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Close enlarged photo' }))
+    expect(screen.queryByRole('dialog', { name: 'Oak shelf' })).toBeNull()
+  })
+
+  it('closes the lightbox on Escape', async () => {
+    mockFetch(() => jsonResponse(sampleItem))
+    renderAt('1')
+    await screen.findByRole('heading', { name: 'Oak shelf' })
+    fireEvent.click(screen.getByRole('button', { name: 'Enlarge photo 1 of Oak shelf' }))
+    await screen.findByRole('dialog', { name: 'Oak shelf' })
+    fireEvent.keyDown(window, { key: 'Escape' })
+    expect(screen.queryByRole('dialog', { name: 'Oak shelf' })).toBeNull()
+  })
+
+  it('navigates between photos with arrow keys', async () => {
+    mockFetch(() => jsonResponse(sampleItem))
+    const { container } = renderAt('1')
+    await screen.findByRole('heading', { name: 'Oak shelf' })
+    fireEvent.click(screen.getByRole('button', { name: 'Enlarge photo 1 of Oak shelf' }))
+    const media = () => container.querySelector('.lightbox-media')
+    await screen.findByRole('dialog', { name: 'Oak shelf' })
+    expect(media()?.getAttribute('src')).toBe('/uploads/a.jpg')
+    fireEvent.keyDown(window, { key: 'ArrowRight' })
+    expect(media()?.getAttribute('src')).toBe('/uploads/b.jpg')
+    fireEvent.keyDown(window, { key: 'ArrowLeft' })
+    expect(media()?.getAttribute('src')).toBe('/uploads/a.jpg')
+  })
+
+  it('does not lightbox video media', async () => {
+    mockFetch(() => jsonResponse({ ...sampleItem, images: ['/uploads/clip.mp4'] }))
+    renderAt('1')
+    await screen.findByRole('heading', { name: 'Oak shelf' })
+    expect(screen.queryByRole('button', { name: /Enlarge photo/ })).toBeNull()
   })
 })
