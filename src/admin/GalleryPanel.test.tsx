@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { MemoryRouter, Route, Routes, useParams } from 'react-router-dom'
 import GalleryPanel from './GalleryPanel'
 import {
   jsonResponse,
@@ -10,6 +11,22 @@ import {
   sampleGallery,
   sampleMedia,
 } from '../test/testUtils'
+
+function PiecePageStub() {
+  const { id } = useParams()
+  return <p>Piece page for {id}</p>
+}
+
+function renderPanel() {
+  return render(
+    <MemoryRouter initialEntries={['/admin']}>
+      <Routes>
+        <Route path="/admin" element={<GalleryPanel />} />
+        <Route path="/gallery/:id" element={<PiecePageStub />} />
+      </Routes>
+    </MemoryRouter>,
+  )
+}
 
 describe('GalleryPanel', () => {
   beforeEach(() => {
@@ -30,7 +47,7 @@ describe('GalleryPanel', () => {
 
   it('loads the pieces and categories into a list', async () => {
     listMock()
-    render(<GalleryPanel />)
+    renderPanel()
     expect(await screen.findByText('Oak shelf')).toBeInTheDocument()
     expect(screen.getByText('draft')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Add a piece' })).toBeInTheDocument()
@@ -46,7 +63,7 @@ describe('GalleryPanel', () => {
       }
       return jsonResponse({}, 404)
     })
-    const { container } = render(<GalleryPanel />)
+    const { container } = renderPanel()
     await screen.findByText('Oak shelf')
     expect(container.querySelector('img.admin-list-thumb')?.getAttribute('src')).toBe(
       '/uploads/a_thumb.jpg',
@@ -60,7 +77,7 @@ describe('GalleryPanel', () => {
       }
       return jsonResponse([])
     })
-    render(<GalleryPanel />)
+    renderPanel()
     expect(await screen.findByText('No pieces yet.')).toBeInTheDocument()
   })
 
@@ -78,13 +95,13 @@ describe('GalleryPanel', () => {
       }
       return jsonResponse({}, 404)
     })
-    render(<GalleryPanel />)
+    renderPanel()
     await screen.findByText('Oak shelf')
     fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'New shelf' } })
     fireEvent.change(screen.getByLabelText('Description'), { target: { value: 'A new shelf.' } })
     fireEvent.change(screen.getByLabelText('Category'), { target: { value: '1' } })
     fireEvent.click(screen.getByRole('button', { name: 'Save piece' }))
-    expect(await screen.findByText('New shelf')).toBeInTheDocument()
+    expect(await screen.findByText('Piece page for 3')).toBeInTheDocument()
     expect(fn).toHaveBeenCalledWith(
       '/api/admin/gallery',
       expect.objectContaining({ method: 'POST' }),
@@ -104,12 +121,12 @@ describe('GalleryPanel', () => {
       }
       return jsonResponse({}, 404)
     })
-    render(<GalleryPanel />)
+    renderPanel()
     await screen.findByText(/Oak shelf/)
     fireEvent.click(screen.getAllByRole('button', { name: 'Edit' })[0])
     fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Oak shelf (edited)' } })
     fireEvent.click(screen.getByRole('button', { name: 'Save piece' }))
-    expect(await screen.findByText(/Oak shelf \(edited\)/)).toBeInTheDocument()
+    expect(await screen.findByText('Piece page for 1')).toBeInTheDocument()
     expect(fn).toHaveBeenCalledWith(
       '/api/admin/gallery/1',
       expect.objectContaining({ method: 'PUT' }),
@@ -131,7 +148,7 @@ describe('GalleryPanel', () => {
       }
       return jsonResponse({}, 404)
     })
-    render(<GalleryPanel />)
+    renderPanel()
     await screen.findByText('Oak shelf')
     fireEvent.click(screen.getAllByRole('button', { name: 'Delete' })[0])
     await waitFor(() =>
@@ -157,7 +174,7 @@ describe('GalleryPanel', () => {
       }
       return jsonResponse({}, 404)
     })
-    render(<GalleryPanel />)
+    renderPanel()
     await screen.findByText('Oak shelf')
     fireEvent.click(screen.getAllByRole('button', { name: 'Delete' })[0])
     expect(await screen.findByText('Request failed with status 409')).toBeInTheDocument()
@@ -165,7 +182,7 @@ describe('GalleryPanel', () => {
 
   it('shows a load failure message', async () => {
     mockFetch(() => jsonResponse({}, 500))
-    render(<GalleryPanel />)
+    renderPanel()
     const messages = await screen.findAllByText('Request failed with status 500')
     expect(messages.length).toBeGreaterThan(0)
   })
@@ -195,7 +212,7 @@ describe('GalleryPanel', () => {
       }
       return jsonResponse({}, 404)
     })
-    render(<GalleryPanel />)
+    renderPanel()
     await screen.findByText('Walnut box')
     fireEvent.click(screen.getAllByRole('button', { name: 'Edit' })[1])
     await screen.findByAltText('Library photo 11')
@@ -231,7 +248,7 @@ describe('GalleryPanel', () => {
       }
       return jsonResponse([])
     })
-    render(<GalleryPanel />)
+    renderPanel()
     await screen.findByText('Oak shelf')
     fireEvent.click(screen.getAllByRole('button', { name: 'Edit' })[0])
     expect(screen.getByRole('heading', { name: /Edit piece/ })).toBeInTheDocument()
@@ -254,7 +271,7 @@ describe('GalleryPanel', () => {
       }
       return jsonResponse([])
     })
-    render(<GalleryPanel />)
+    renderPanel()
     await screen.findByText('Oak shelf')
     fireEvent.click(screen.getAllByRole('button', { name: 'Edit' })[0])
     expect(screen.getByRole('heading', { name: /Edit piece/ })).toBeInTheDocument()
@@ -276,7 +293,7 @@ describe('GalleryPanel', () => {
       }
       return jsonResponse([])
     })
-    render(<GalleryPanel />)
+    renderPanel()
     await screen.findByText('Oak shelf')
     fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Fails' } })
     fireEvent.click(screen.getByRole('button', { name: 'Save piece' }))
@@ -296,7 +313,7 @@ describe('GalleryPanel', () => {
       }
       return jsonResponse({}, 404)
     })
-    render(<GalleryPanel />)
+    renderPanel()
     await screen.findByText('No cat')
     fireEvent.click(screen.getByRole('button', { name: 'Edit' }))
     expect((screen.getByLabelText('Category') as HTMLSelectElement).value).toBe('')
@@ -320,7 +337,7 @@ describe('GalleryPanel', () => {
        }
        return jsonResponse({}, 404)
      })
-     render(<GalleryPanel />)
+     renderPanel()
      await screen.findByText('Oak shelf')
      fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Fails' } })
      fireEvent.click(screen.getByRole('button', { name: 'Save piece' }))
@@ -333,7 +350,7 @@ describe('GalleryPanel', () => {
      mockFetch(() => {
        throw 'load boom'
      })
-     render(<GalleryPanel />)
+     renderPanel()
      expect(await screen.findByText('Failed to load gallery')).toBeInTheDocument()
    })
 
@@ -357,7 +374,7 @@ describe('GalleryPanel', () => {
       }
       return jsonResponse({}, 404)
     })
-    render(<GalleryPanel />)
+    renderPanel()
     await screen.findByText('Oak shelf')
     fireEvent.click(screen.getAllByRole('button', { name: 'Edit' })[0])
     fireEvent.click(screen.getByRole('button', { name: 'Draft description from photo' }))
@@ -384,7 +401,7 @@ describe('GalleryPanel', () => {
       }
       return jsonResponse({}, 404)
     })
-    render(<GalleryPanel />)
+    renderPanel()
     await screen.findByText('Oak shelf')
     fireEvent.change(screen.getByLabelText('Upload a cover photo'), {
       target: { files: [new File(['x'], 'cover.png')] },
@@ -410,7 +427,7 @@ describe('GalleryPanel', () => {
       }
       return jsonResponse({}, 404)
     })
-    render(<GalleryPanel />)
+    renderPanel()
     await screen.findByText('Oak shelf')
     fireEvent.click(screen.getAllByRole('button', { name: 'Edit' })[0])
     fireEvent.click(screen.getByRole('button', { name: 'Draft description from photo' }))
@@ -436,7 +453,7 @@ describe('GalleryPanel', () => {
       }
       return jsonResponse({}, 404)
     })
-    render(<GalleryPanel />)
+    renderPanel()
     await screen.findByText('Oak shelf')
     fireEvent.click(screen.getAllByRole('button', { name: 'Edit' })[0])
     fireEvent.click(screen.getByRole('button', { name: 'Draft description from photo' }))
