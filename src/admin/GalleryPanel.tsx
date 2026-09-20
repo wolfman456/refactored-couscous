@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   deleteGalleryItem,
   fetchAdminGallery,
@@ -44,6 +45,7 @@ function draftFrom(item: GalleryItem): DraftForm {
 }
 
 export default function GalleryPanel() {
+  const navigate = useNavigate()
   const [items, setItems] = useState<GalleryItem[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [editingId, setEditingId] = useState<number | null>(null)
@@ -82,7 +84,7 @@ export default function GalleryPanel() {
     setSaving(true)
     setError(null)
     try {
-      await saveGalleryItem(
+      const saved = await saveGalleryItem(
         editingId,
         {
           title: draft.title,
@@ -94,8 +96,7 @@ export default function GalleryPanel() {
         },
         extraImage,
       )
-      resetForm()
-      await refresh()
+      navigate(`/gallery/${saved.id}`)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to save piece')
     } finally {
