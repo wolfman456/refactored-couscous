@@ -12,7 +12,7 @@ export interface SiteSettings {
 
 export interface SettingsUpdateForm {
   siteTitle?: string
-  backgroundMediaId?: number | null
+  backgroundMediaId?: string
   contactEmail?: string
   etsyUrl?: string
   instagramUrl?: string
