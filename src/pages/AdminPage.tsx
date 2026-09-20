@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { hasCredential, setCredential } from '../api/client'
+import { useEffect, useState } from 'react'
+import { hasCredential, setCredential, UNAUTHORIZED_EVENT } from '../api/client'
 import AdminLogin from '../admin/AdminLogin'
 import PhotosPanel from '../admin/PhotosPanel'
 import GalleryPanel from '../admin/GalleryPanel'
@@ -24,6 +24,12 @@ export default function AdminPage() {
   useSeo({ title: 'Content manager · Six Kids Crafts', noindex: true })
   const [authed, setAuthed] = useState(hasCredential())
   const [panel, setPanel] = useState<Panel>('photos')
+
+  useEffect(() => {
+    const onUnauthorized = () => setAuthed(false)
+    window.addEventListener(UNAUTHORIZED_EVENT, onUnauthorized)
+    return () => window.removeEventListener(UNAUTHORIZED_EVENT, onUnauthorized)
+  }, [])
 
   if (!authed) {
     return <AdminLogin onSuccess={() => setAuthed(true)} />

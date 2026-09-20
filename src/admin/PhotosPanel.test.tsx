@@ -41,7 +41,7 @@ describe('PhotosPanel', () => {
         '/api/admin/settings',
         expect.objectContaining({
           method: 'PUT',
-          body: JSON.stringify({ backgroundMediaId: 11 }),
+          body: JSON.stringify({ backgroundMediaId: '11' }),
         }),
       ),
     )

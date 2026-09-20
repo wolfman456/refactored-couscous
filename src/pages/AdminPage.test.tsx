@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import AdminPage from './AdminPage'
+import { UNAUTHORIZED_EVENT } from '../api/client'
 import { jsonResponse, mockFetch, restoreFetch, sampleSettings } from '../test/testUtils'
 
 describe('AdminPage', () => {
@@ -117,6 +118,24 @@ describe('AdminPage', () => {
       await screen.findByText('Site settings')
       fireEvent.click(screen.getByRole('button', { name: 'Account' }))
       await screen.findByRole('heading', { name: 'Change password' })
+    })
+
+    it('returns to the login screen when the session expires', async () => {
+      mockFetch((url) => {
+        if (url === '/api/admin/media') {
+          return jsonResponse([])
+        }
+        return jsonResponse(sampleSettings)
+      })
+      sessionStorage.setItem('adminAuth', 'YWRtaW46cHc=')
+      render(
+        <MemoryRouter>
+          <AdminPage />
+        </MemoryRouter>,
+      )
+      await screen.findByText('Photo library')
+      fireEvent(window, new CustomEvent(UNAUTHORIZED_EVENT))
+      expect(await screen.findByRole('heading', { name: 'Admin login' })).toBeInTheDocument()
     })
   })
 })

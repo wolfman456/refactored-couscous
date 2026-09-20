@@ -1,19 +1,46 @@
 const AUTH_KEY = 'adminAuth'
 
+export const UNAUTHORIZED_EVENT = 'sixkids:unauthorized'
+
 export interface RequestOptions {
   method?: string
   body?: BodyInit
   auth?: boolean
 }
 
+interface ErrorBody {
+  message?: string
+  error?: string
+  fieldErrors?: { message?: string }[]
+}
+
 export class ApiError extends Error {
   status: number
 
-  constructor(status: number) {
-    super(`Request failed with status ${status}`)
+  constructor(status: number, message: string) {
+    super(message)
     this.name = 'ApiError'
     this.status = status
   }
+}
+
+async function errorMessage(res: Response): Promise<string> {
+  try {
+    const body = (await res.json()) as ErrorBody
+    if (typeof body.message === 'string' && body.message.length > 0) {
+      return body.message
+    }
+    if (typeof body.error === 'string' && body.error.length > 0) {
+      return body.error
+    }
+    const first = body.fieldErrors?.[0]?.message
+    if (typeof first === 'string' && first.length > 0) {
+      return first
+    }
+  } catch {
+    // body is not JSON; fall through
+  }
+  return `Request failed with status ${res.status}`
 }
 
 export class UnauthorizedError extends Error {
@@ -40,7 +67,12 @@ export function setCredential(token: string | null): void {
 }
 
 export function encodeBasic(username: string, password: string): string {
-  return btoa(`${username}:${password}`)
+  const bytes = new TextEncoder().encode(`${username}:${password}`)
+  let binary = ''
+  for (const byte of bytes) {
+    binary += String.fromCharCode(byte)
+  }
+  return btoa(binary)
 }
 
 export function getUsername(): string | null {
@@ -74,10 +106,11 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
   })
   if (res.status === 401 && options.auth) {
     setCredential(null)
+    window.dispatchEvent(new CustomEvent(UNAUTHORIZED_EVENT))
     throw new UnauthorizedError()
   }
   if (!res.ok) {
-    throw new ApiError(res.status)
+    throw new ApiError(res.status, await errorMessage(res))
   }
   if (res.status === 204) {
     return undefined as T

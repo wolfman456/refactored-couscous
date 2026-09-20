@@ -68,7 +68,7 @@ export default function SitePanel() {
     try {
       const updated = await updateSettings({
         siteTitle,
-        backgroundMediaId,
+        backgroundMediaId: backgroundMediaId === null ? '' : String(backgroundMediaId),
         contactEmail,
         etsyUrl,
         instagramUrl,

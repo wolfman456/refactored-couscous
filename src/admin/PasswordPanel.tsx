@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { changePassword } from '../api/auth'
-import { ApiError, encodeBasic, getUsername, setCredential } from '../api/client'
+import { encodeBasic, getUsername, setCredential } from '../api/client'
 
 export default function PasswordPanel() {
   const [currentPassword, setCurrentPassword] = useState('')
@@ -34,11 +34,7 @@ export default function PasswordPanel() {
       setNewPassword('')
       setConfirmPassword('')
     } catch (err: unknown) {
-      if (err instanceof ApiError && err.status === 400) {
-        setError('Current password is incorrect')
-      } else {
-        setError(err instanceof Error ? err.message : 'Failed to change password')
-      }
+      setError(err instanceof Error ? err.message : 'Failed to change password')
     } finally {
       setSaving(false)
     }

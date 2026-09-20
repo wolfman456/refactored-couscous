@@ -25,7 +25,9 @@ export default function PhotosPanel() {
     setSavingBackground(true)
     setError(null)
     try {
-      const settings = await updateSettings({ backgroundMediaId: id })
+      const settings = await updateSettings({
+        backgroundMediaId: id === null ? '' : String(id),
+      })
       setBackgroundId(settings.backgroundMediaId)
       setSettings(settings)
     } catch (err: unknown) {
