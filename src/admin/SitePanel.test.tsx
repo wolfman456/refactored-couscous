@@ -56,7 +56,7 @@ describe('SitePanel', () => {
     const fn = mockFetch((url, init) => {
       if (url === '/api/admin/settings' && init?.method === 'PUT') {
         const body = JSON.parse(init?.body as string) as Record<string, unknown>
-        expect(body.backgroundMediaId).toBe(11)
+        expect(body.backgroundMediaId).toBe('11')
         return jsonResponse(sampleSettings)
       }
       if (url === '/api/admin/media') {
@@ -75,7 +75,7 @@ describe('SitePanel', () => {
     const fn = mockFetch((url, init) => {
       if (url === '/api/admin/settings' && init?.method === 'PUT') {
         const body = JSON.parse(init?.body as string) as Record<string, unknown>
-        expect(body.backgroundMediaId).toBeNull()
+        expect(body.backgroundMediaId).toBe('')
         return jsonResponse(sampleSettings)
       }
       if (url === '/api/admin/media') {

@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import {
   ApiError,
+  UNAUTHORIZED_EVENT,
   UnauthorizedError,
   apiFetch,
   encodeBasic,
@@ -113,5 +114,60 @@ describe('api/client', () => {
     expect(getUsername()).toBe('admin')
     setCredential('not base64')
     expect(getUsername()).toBeNull()
+  })
+
+  it('surfaces the server error from the {error} body', async () => {
+    setCredential(encodeBasic('admin', 'pw'))
+    mockFetch(() => jsonResponse({ error: 'Current password is incorrect' }, 400))
+    await expect(apiFetch('/api/admin/change-password', { method: 'POST', auth: true })).rejects.toMatchObject({
+      name: 'ApiError',
+      status: 400,
+      message: 'Current password is incorrect',
+    })
+  })
+
+  it('surfaces the server message from the {message} body', async () => {
+    setCredential(encodeBasic('admin', 'pw'))
+    mockFetch(() => jsonResponse({ message: 'Title is required' }, 400))
+    await expect(apiFetch('/api/admin/gallery', { auth: true })).rejects.toMatchObject({
+      message: 'Title is required',
+    })
+  })
+
+  it('surfaces the first field error from the fieldErrors body', async () => {
+    setCredential(encodeBasic('admin', 'pw'))
+    mockFetch(() =>
+      jsonResponse({ status: 400, fieldErrors: [{ field: 'newPassword', message: 'New password must be at least 8 characters' }] }, 400),
+    )
+    await expect(apiFetch('/api/admin/change-password', { method: 'POST', auth: true })).rejects.toMatchObject({
+      message: 'New password must be at least 8 characters',
+    })
+  })
+
+  it('falls back to a generic message when the body is not parseable', async () => {
+    mockFetch(() => ({ ...jsonResponse({}, 500), json: () => Promise.reject(new Error('bad json')) }) as Response)
+    await expect(apiFetch('/api/gallery')).rejects.toMatchObject({
+      name: 'ApiError',
+      status: 500,
+      message: 'Request failed with status 500',
+    })
+  })
+
+  it('dispatches the unauthorized event on a 401', async () => {
+    setCredential(encodeBasic('admin', 'pw'))
+    const events: string[] = []
+    window.addEventListener(UNAUTHORIZED_EVENT, () => events.push(UNAUTHORIZED_EVENT))
+    mockFetch(() => jsonResponse({}, 401))
+    await expect(apiFetch('/api/admin/gallery', { auth: true })).rejects.toBeInstanceOf(UnauthorizedError)
+    expect(events).toEqual([UNAUTHORIZED_EVENT])
+  })
+
+  it('encodeBasic is UTF-8 safe for non-Latin-1 characters', () => {
+    const token = encodeBasic('café', 'päss')
+    const decoded = new TextDecoder().decode(
+      Uint8Array.from(atob(token), (c) => c.charCodeAt(0)),
+    )
+    expect(decoded).toBe('café:päss')
+    expect(() => encodeBasic('user', 'mot de passe é')).not.toThrow()
   })
 })
