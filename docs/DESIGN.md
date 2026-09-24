@@ -11,7 +11,10 @@ ecommerce.**
 
 ## Pages
 
-- `/` — Gallery grid with category tabs ("All" + each category). Reads
+- `/` — Landing page. Shows only the settings-driven background photo and the
+  header nav tabs (Gallery/Articles/Contact/Admin); no content. Gallery content
+  appears when the Gallery tab is chosen.
+- `/gallery` — Gallery grid with category tabs ("All" + each category). Reads
   `GET /api/gallery` and `GET /api/categories`; renders cards (image, title,
   description, category). Empty/error/loading states handled.
 - `/gallery/:id` — Gallery piece detail. Reads `GET /api/gallery/{id}` and shows

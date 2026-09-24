@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import App from './App'
 import { jsonResponse, mockFetch, restoreFetch, sampleCategories, sampleGallery } from './test/testUtils'
@@ -33,11 +34,11 @@ describe('App', () => {
       </MemoryRouter>,
     )
     expect(await screen.findByText('Six Kids Crafts')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Gallery' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Gallery' })).toHaveAttribute('href', '/gallery')
     expect(screen.getByRole('link', { name: 'Articles' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Contact' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Admin' })).toBeInTheDocument()
-    expect(await screen.findByText('Oak shelf')).toBeInTheDocument()
+    expect(screen.queryByText('Oak shelf')).not.toBeInTheDocument()
     expect(container.querySelector('.page')?.getAttribute('style')).toContain(
       'url("/uploads/bg.jpg")',
     )
@@ -61,7 +62,28 @@ describe('App', () => {
     expect(await screen.findByText('Six Kids Crafts')).toBeInTheDocument()
   })
 
-  it('renders the gallery at /gallery as well as /', async () => {
+  it('shows the gallery when the Gallery tab is clicked from the landing', async () => {
+    mockFetch((url) => {
+      if (url === '/api/categories') {
+        return jsonResponse(sampleCategories)
+      }
+      if (url === '/api/settings') {
+        return jsonResponse({})
+      }
+      return jsonResponse(sampleGallery)
+    })
+    const user = userEvent.setup()
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <App />
+      </MemoryRouter>,
+    )
+    expect(screen.queryByText('Oak shelf')).not.toBeInTheDocument()
+    await user.click(screen.getByRole('link', { name: 'Gallery' }))
+    expect(await screen.findByText('Oak shelf')).toBeInTheDocument()
+  })
+
+  it('renders the gallery grid at /gallery', async () => {
     mockFetch((url) => {
       if (url === '/api/categories') {
         return jsonResponse(sampleCategories)
@@ -79,7 +101,7 @@ describe('App', () => {
     expect(await screen.findByText('Oak shelf')).toBeInTheDocument()
   })
 
-  it('redirects unknown paths back to the gallery', async () => {
+  it('redirects unknown paths to the gallery', async () => {
     mockFetch((url) => {
       if (url === '/api/categories') {
         return jsonResponse(sampleCategories)
