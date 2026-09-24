@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import ArticlePage from './ArticlePage'
 import { jsonResponse, mockFetch, restoreFetch, sampleArticles } from '../test/testUtils'
@@ -27,7 +27,7 @@ describe('ArticlePage', () => {
     renderAt('first-post')
     expect(screen.getByText('Loading article…')).toBeInTheDocument()
     expect(await screen.findByRole('heading', { name: 'First post' })).toBeInTheDocument()
-    expect(document.title).toBe('First post · Six Kids Crafts')
+    await waitFor(() => expect(document.title).toBe('First post · Six Kids Crafts'))
     expect(screen.getByRole('link', { name: '← All articles' })).toBeInTheDocument()
     expect(screen.getByText('Hello')).toBeInTheDocument()
     expect(screen.getByText('Hello').tagName).toBe('H1')

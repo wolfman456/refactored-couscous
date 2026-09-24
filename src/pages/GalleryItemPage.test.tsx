@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import GalleryItemPage from './GalleryItemPage'
 import { jsonResponse, mockFetch, restoreFetch, sampleGallery } from '../test/testUtils'
@@ -35,7 +35,7 @@ describe('GalleryItemPage', () => {
     expect(await screen.findByRole('heading', { name: 'Oak shelf' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: '← All pieces' })).toBeInTheDocument()
     expect(screen.getByText('A small oak shelf.')).toBeInTheDocument()
-    expect(document.title).toBe('Oak shelf · Six Kids Crafts')
+    await waitFor(() => expect(document.title).toBe('Oak shelf · Six Kids Crafts'))
     const imgs = container.querySelectorAll('img.gallery-detail-media')
     expect(imgs).toHaveLength(2)
     expect(imgs[0].getAttribute('src')).toBe('/uploads/a_thumb.jpg')
