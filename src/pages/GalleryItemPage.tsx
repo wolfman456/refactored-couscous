@@ -44,7 +44,7 @@ export default function GalleryItemPage() {
       <section className="gallery-detail">
         <p className="gallery-note gallery-error">{error ?? 'Piece not found.'}</p>
         <p className="gallery-note-back">
-          <Link to="/">← All pieces</Link>
+          <Link to="/gallery">← All pieces</Link>
         </p>
       </section>
     )
@@ -94,7 +94,7 @@ export default function GalleryItemPage() {
   return (
     <article className="gallery-detail">
       <p className="gallery-note-back">
-        <Link to="/">← All pieces</Link>
+        <Link to="/gallery">← All pieces</Link>
       </p>
       <h1 className="gallery-detail-title">{item.title}</h1>
       {item.categoryName && <p className="gallery-detail-category">{item.categoryName}</p>}
