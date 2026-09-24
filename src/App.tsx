@@ -1,4 +1,5 @@
 import { Link, Navigate, Route, Routes } from 'react-router-dom'
+import HomePage from './pages/HomePage'
 import GalleryPage from './pages/GalleryPage'
 import GalleryItemPage from './pages/GalleryItemPage'
 import ArticlesPage from './pages/ArticlesPage'
@@ -18,7 +19,7 @@ function Shell() {
           {title}
         </Link>
         <nav className="site-nav">
-          <Link to="/">Gallery</Link>
+          <Link to="/gallery">Gallery</Link>
           <Link to="/articles">Articles</Link>
           <Link to="/contact">Contact</Link>
           <Link to="/admin">Admin</Link>
@@ -26,14 +27,14 @@ function Shell() {
       </header>
       <main className="site-main">
         <Routes>
-          <Route path="/" element={<GalleryPage />} />
+          <Route path="/" element={<HomePage />} />
           <Route path="/gallery" element={<GalleryPage />} />
           <Route path="/gallery/:id" element={<GalleryItemPage />} />
           <Route path="/articles" element={<ArticlesPage />} />
           <Route path="/articles/:slug" element={<ArticlePage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/admin" element={<AdminPage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to="/gallery" replace />} />
         </Routes>
       </main>
     </div>
