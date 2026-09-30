@@ -29,8 +29,9 @@ describe('api/client', () => {
   it('sends JSON bodies for non-FormData payloads', async () => {
     setCredential(encodeBasic('admin', 'pw'))
     const fn = mockFetch((_url, init) => {
+      const headers = init?.headers as Record<string, string> | undefined
       expect(init?.method).toBe('PUT')
-      expect((init?.headers as Record<string, string>)['Content-Type']).toBe('application/json')
+      expect(headers?.['Content-Type']).toBe('application/json')
       expect(init?.body).toBe('{"a":1}')
       return jsonResponse({ done: true })
     })
@@ -47,7 +48,8 @@ describe('api/client', () => {
     const fd = new FormData()
     fd.append('file', new File(['x'], 'x.png'))
     const fn = mockFetch((_url, init) => {
-      expect((init?.headers as Record<string, string>)['Content-Type']).toBeUndefined()
+      const headers = init?.headers as Record<string, string> | undefined
+      expect(headers?.['Content-Type']).toBeUndefined()
       expect(init?.body).toBeInstanceOf(FormData)
       return jsonResponse({ id: 1 })
     })
@@ -86,7 +88,8 @@ describe('api/client', () => {
   it('sends the Basic auth header when a credential is stored', async () => {
     setCredential(encodeBasic('admin', 'pw'))
     const fn = mockFetch((_url, init) => {
-      expect((init?.headers as Record<string, string>).Authorization).toBe(
+      const headers = init?.headers as Record<string, string> | undefined
+      expect(headers?.Authorization).toBe(
         'Basic YWRtaW46cHc=',
       )
       return jsonResponse({})
