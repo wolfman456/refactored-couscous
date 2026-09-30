@@ -37,7 +37,8 @@ describe('api module wrappers', () => {
   it('applies the stored credential for authed admin calls', async () => {
     setCredential(encodeBasic('admin', 'pw'))
     const fn = mockFetch((_url, init) => {
-      expect((init?.headers as Record<string, string>).Authorization).toBe('Basic YWRtaW46cHc=')
+      const headers = init?.headers as Record<string, string> | undefined
+      expect(headers?.Authorization).toBe('Basic YWRtaW46cHc=')
       return jsonResponse([])
     })
     await uploadMedia(new File(['x'], 'x.png'))
