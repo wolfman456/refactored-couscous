@@ -200,3 +200,5 @@ backend design doc for the API side of those.
 ## Etsy gallery links
 
 The homepage uses the public gallery grid and the navigation links to the configured Etsy shop. For gallery entries with an Etsy listing URL, the cover photo opens that listing and the title opens the local piece page. The gallery admin can set or clear the listing URL.
+
+Contact shows a loading state while settings are pending, and uses the public Six Kids Crafts email and Etsy shop when the settings request fails. A successfully loaded empty configuration still shows the empty state.

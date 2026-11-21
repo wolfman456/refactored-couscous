@@ -10,14 +10,29 @@ describe('ContactPage', () => {
     restoreFetch()
   })
 
-  it('shows the coming-soon note while settings are unknown', () => {
+  it('shows a loading state while settings are unknown', () => {
     mockFetch(() => new Promise(() => undefined))
     render(
       <SiteSettingsProvider>
         <ContactPage />
       </SiteSettingsProvider>,
     )
-    expect(screen.getByText('Our contact details are coming soon.')).toBeInTheDocument()
+    expect(screen.getByRole('status')).toHaveTextContent('Loading contact details')
+  })
+
+  it('keeps the public email and Etsy shop available when settings fail', async () => {
+    mockFetch(() => jsonResponse({}, 503))
+    render(
+      <SiteSettingsProvider>
+        <ContactPage />
+      </SiteSettingsProvider>,
+    )
+    expect(await screen.findByRole('link', { name: '6kidscrafts@gmail.com' })).toHaveAttribute(
+      'href', 'mailto:6kidscrafts@gmail.com',
+    )
+    expect(screen.getByRole('link', { name: 'Etsy shop' })).toHaveAttribute(
+      'href', 'https://www.etsy.com/shop/SixKidsCraftsUS',
+    )
   })
 
   it('shows coming soon when all contact links are absent', async () => {

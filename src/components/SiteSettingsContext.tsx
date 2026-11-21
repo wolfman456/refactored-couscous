@@ -16,6 +16,13 @@ export interface SiteSettingsActions {
   setSettings: (settings: SiteSettings) => void
 }
 
+const SiteSettingsFailedContext = createContext(false)
+
+// eslint-disable-next-line react/only-export-components
+export function useSiteSettingsFailed(): boolean {
+  return useContext(SiteSettingsFailedContext)
+}
+
 const noopActions: SiteSettingsActions = {
   refresh: () => Promise.resolve(),
   setSettings: () => undefined,
@@ -39,8 +46,11 @@ export function useSiteSettingsActions(): SiteSettingsActions {
 export function SiteSettingsProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<SiteSettings | null>(null)
 
+  const [failed, setFailed] = useState(false)
+
   const refresh = useCallback(async () => {
     setSettings(await fetchSettings())
+    setFailed(false)
   }, [])
 
   useEffect(() => {
@@ -52,7 +62,9 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
         }
       })
       .catch(() => {
-        // Public shell keeps working with defaults while offline/misconfigured.
+        if (active) {
+          setFailed(true)
+        }
       })
     return () => {
       active = false
@@ -66,7 +78,9 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
 
   return (
     <SiteSettingsActionsContext.Provider value={actions}>
-      <SiteSettingsContext.Provider value={settings}>{children}</SiteSettingsContext.Provider>
+      <SiteSettingsFailedContext.Provider value={failed && !settings}>
+        <SiteSettingsContext.Provider value={settings}>{children}</SiteSettingsContext.Provider>
+      </SiteSettingsFailedContext.Provider>
     </SiteSettingsActionsContext.Provider>
   )
 }
