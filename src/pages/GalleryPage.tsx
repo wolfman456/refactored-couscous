@@ -15,6 +15,10 @@ const message = (err: unknown, fallback: string) =>
 
 export default function GalleryPage() {
   useSeo({ title: 'Gallery · Six Kids Crafts', description: GALLERY_DESCRIPTION })
+  return <GalleryGrid />
+}
+
+export function GalleryGrid() {
   const [items, setItems] = useState<GalleryItem[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [activeTab, setActiveTab] = useState<ActiveTab>('all')
@@ -83,42 +87,55 @@ export default function GalleryPage() {
         </p>
       ) : (
         <section className="gallery-grid">
-          {visible.map((item) => (
-            <article key={item.id} className="gallery-card">
-              <Link to={`/gallery/${item.id}`} className="gallery-card-link">
-                {item.images.length > 0 ? (
-                  isVideoUrl(item.images[0]) ? (
-                    <video
-                      src={item.images[0]}
-                      controls
-                      playsInline
-                      preload="metadata"
-                      aria-label={item.title}
-                      className="gallery-card-img"
-                    />
-                  ) : (
-                    <img
-                      src={item.thumbnails?.[0] ?? item.images[0]}
-                      srcSet={imageSrcSet(item.images[0], item.thumbnails?.[0])}
-                      sizes="(max-width: 700px) 100vw, 320px"
-                      alt={item.title}
-                      loading="lazy"
-                      className="gallery-card-img"
-                    />
-                  )
-                ) : (
-                  <div className="gallery-card-img gallery-card-placeholder" />
+          {visible.map((item) => {
+            const pieceUrl = `/gallery/${item.id}`
+            const cover = item.images.length > 0 ? (
+              isVideoUrl(item.images[0]) ? (
+                <video
+                  src={item.images[0]}
+                  controls
+                  playsInline
+                  preload="metadata"
+                  aria-label={item.title}
+                  className="gallery-card-img"
+                />
+              ) : (
+                <img
+                  src={item.thumbnails?.[0] ?? item.images[0]}
+                  srcSet={imageSrcSet(item.images[0], item.thumbnails?.[0])}
+                  sizes="(max-width: 700px) 100vw, 320px"
+                  alt={item.title}
+                  loading="lazy"
+                  className="gallery-card-img"
+                />
+              )
+            ) : (
+              <div className="gallery-card-img gallery-card-placeholder" />
+            )
+            const body = (
+              <div className="gallery-card-body">
+                <h2>{item.title}</h2>
+                {item.categoryName && (
+                  <span className="gallery-card-category">{item.categoryName}</span>
                 )}
-                <div className="gallery-card-body">
-                  <h2>{item.title}</h2>
-                  {item.categoryName && (
-                    <span className="gallery-card-category">{item.categoryName}</span>
-                  )}
-                  {item.description && <p>{item.description}</p>}
-                </div>
-              </Link>
-            </article>
-          ))}
+                {item.description && <p>{item.description}</p>}
+              </div>
+            )
+            return (
+              <article key={item.id} className="gallery-card">
+                {item.etsyListingUrl && item.images[0] && !isVideoUrl(item.images[0]) ? (
+                  <>
+                    <a href={item.etsyListingUrl} aria-label={`Shop ${item.title} on Etsy`}>
+                      {cover}
+                    </a>
+                    <Link to={pieceUrl} className="gallery-card-link">{body}</Link>
+                  </>
+                ) : (
+                  <Link to={pieceUrl} className="gallery-card-link">{cover}{body}</Link>
+                )}
+              </article>
+            )
+          })}
         </section>
       )}
     </>
