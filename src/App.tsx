@@ -22,6 +22,7 @@ function Shell() {
           <Link to="/gallery">Gallery</Link>
           <Link to="/articles">Articles</Link>
           <Link to="/contact">Contact</Link>
+          {settings?.etsyUrl && <a href={settings.etsyUrl}>Shop on Etsy</a>}
           <Link to="/admin">Admin</Link>
         </nav>
       </header>

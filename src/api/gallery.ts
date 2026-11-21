@@ -4,6 +4,7 @@ export interface GalleryItem {
   id: number
   title: string
   description: string | null
+  etsyListingUrl?: string | null
   categoryId: number | null
   categoryName: string | null
   sortOrder: number
@@ -17,6 +18,7 @@ export interface GalleryItem {
 export interface GalleryItemForm {
   title: string
   description: string
+  etsyListingUrl?: string
   categoryId: number | null
   sortOrder: number
   published: boolean

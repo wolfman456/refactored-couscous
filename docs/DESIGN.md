@@ -195,3 +195,8 @@ Not built: video embeds (the backend's `media_asset.asset_type` anticipates them
 but exposes nothing yet), a drag-to-reorder UI for a piece's photos, and
 app-user accounts (admin is a single seeded Basic-auth credential). See the
 backend design doc for the API side of those.
+
+
+## Etsy gallery links
+
+The homepage uses the public gallery grid and the navigation links to the configured Etsy shop. For gallery entries with an Etsy listing URL, the cover photo opens that listing and the title opens the local piece page. The gallery admin can set or clear the listing URL.

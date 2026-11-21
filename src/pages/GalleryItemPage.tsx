@@ -54,7 +54,7 @@ export default function GalleryItemPage() {
 
   const renderMedia = () => {
     let photoIndex = 0
-    return item.images.map((url) => {
+    return item.images.map((url, mediaIndex) => {
       if (isVideoUrl(url)) {
         return (
           <video
@@ -79,8 +79,8 @@ export default function GalleryItemPage() {
           onClick={() => setLightboxIndex(current)}
         >
           <img
-            src={item.thumbnails?.[current] ?? url}
-            srcSet={imageSrcSet(url, item.thumbnails?.[current])}
+            src={item.thumbnails?.[mediaIndex] ?? url}
+            srcSet={imageSrcSet(url, item.thumbnails?.[mediaIndex])}
             sizes="(max-width: 700px) 100vw, 360px"
             alt={`${item.title} photo ${current + 1}`}
             loading="lazy"

@@ -1,5 +1,6 @@
 import { useSiteSettings } from '../components/SiteSettingsContext'
 import { useSeo } from '../lib/seo'
+import { GalleryGrid } from './GalleryPage'
 
 export const LANDING_DESCRIPTION =
   'Handcrafted wood décor, signs, cutting boards and custom furniture by Six Kids Crafts.'
@@ -10,5 +11,5 @@ export default function HomePage() {
     title: settings?.siteTitle ?? 'Six Kids Crafts',
     description: LANDING_DESCRIPTION,
   })
-  return null
+  return <GalleryGrid />
 }

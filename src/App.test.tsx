@@ -21,12 +21,15 @@ describe('App', () => {
           backgroundMediaId: 7,
           backgroundImage: '/uploads/bg.jpg',
           contactEmail: null,
-          etsyUrl: null,
+          etsyUrl: 'https://www.etsy.com/shop/SixKidsCraftsUS',
           instagramUrl: null,
           facebookUrl: null,
         })
       }
-      return jsonResponse(sampleGallery)
+      return jsonResponse(sampleGallery.map((item) => ({
+        ...item,
+        etsyListingUrl: 'https://www.etsy.com/listing/123/oak-shelf',
+      })))
     })
     const { container } = render(
       <MemoryRouter initialEntries={['/']}>
@@ -38,7 +41,13 @@ describe('App', () => {
     expect(screen.getByRole('link', { name: 'Articles' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Contact' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Admin' })).toBeInTheDocument()
-    expect(screen.queryByText('Oak shelf')).not.toBeInTheDocument()
+    expect(await screen.findByText('Oak shelf')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Shop on Etsy' })).toHaveAttribute(
+      'href', 'https://www.etsy.com/shop/SixKidsCraftsUS',
+    )
+    expect(screen.getByRole('link', { name: 'Shop Oak shelf on Etsy' })).toHaveAttribute(
+      'href', 'https://www.etsy.com/listing/123/oak-shelf',
+    )
     expect(container.querySelector('.page')?.getAttribute('style')).toContain(
       'url("/uploads/bg.jpg")',
     )
