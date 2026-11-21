@@ -4,6 +4,7 @@ COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
 RUN npm run build
+RUN node scripts/insert-metadata-ssi.mjs
 
 FROM nginx:alpine
 COPY nginx.conf.template /etc/nginx/conf.d/default.conf.template

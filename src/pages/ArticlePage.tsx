@@ -15,6 +15,7 @@ export default function ArticlePage() {
   const [loading, setLoading] = useState(!!slug)
 
   useSeo({
+    noindex: Boolean(error),
     title: article ? `${article.title} · Six Kids Crafts` : 'Article · Six Kids Crafts',
     description: article
       ? metaDescription(plainText(article.bodyMd), FALLBACK_DESCRIPTION)

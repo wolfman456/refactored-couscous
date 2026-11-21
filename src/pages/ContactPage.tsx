@@ -1,4 +1,4 @@
-import { useSiteSettings } from '../components/SiteSettingsContext'
+import { useSiteSettings, useSiteSettingsFailed } from '../components/SiteSettingsContext'
 import type { SiteSettings } from '../api/settings'
 import { useSeo } from '../lib/seo'
 
@@ -31,7 +31,11 @@ export default function ContactPage() {
     description: 'Questions, custom commissions or just want to say hello? Get in touch with Six Kids Crafts.',
   })
   const settings = useSiteSettings()
-  const links = settings ? contactLinks(settings) : []
+  const failed = useSiteSettingsFailed()
+  const links = settings ? contactLinks(settings) : [
+    { key: 'email', label: '6kidscrafts@gmail.com', url: 'mailto:6kidscrafts@gmail.com' },
+    { key: 'etsy', label: 'Etsy shop', url: 'https://www.etsy.com/shop/SixKidsCraftsUS' },
+  ]
 
   return (
     <section className="contact">
@@ -40,7 +44,9 @@ export default function ContactPage() {
         Have a question about a piece, a custom commission, or just want to say
         hello? Reach out any time.
       </p>
-      {links.length === 0 ? (
+      {!settings && !failed ? (
+        <p role="status">Loading contact details…</p>
+      ) : links.length === 0 ? (
         <p>Our contact details are coming soon.</p>
       ) : (
         <ul className="contact-list">

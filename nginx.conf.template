@@ -25,6 +25,25 @@ server {
     proxy_set_header X-Forwarded-Proto $scheme;
   }
 
+  location ~ ^/(gallery/[0-9]+|articles/[a-z0-9-]+)/?$ {
+    set $metadata_route /$1;
+    ssi on;
+    add_header Cache-Control "no-cache";
+    rewrite ^ /index.html break;
+  }
+
+  location ~ ^/_piece-meta(?<metadata_path>/.*)$ {
+    internal;
+    proxy_pass http://$api_host:$api_port/api/page-meta$metadata_path;
+    proxy_set_header Accept-Encoding "";
+    proxy_intercept_errors on;
+    error_page 500 502 503 504 = @metadata_unavailable;
+  }
+
+  location @metadata_unavailable {
+    return 204;
+  }
+
   location = /index.html {
     add_header Cache-Control "no-cache";
   }

@@ -72,21 +72,26 @@ export function useSeo({
     setMeta('property', 'og:title', title)
     setMeta('property', 'og:description', description)
     setMeta('property', 'og:type', type)
-    setMeta('property', 'og:url', window.location.href)
+    const canonicalUrl = absoluteUrl(window.location.pathname)
+    setMeta('property', 'og:url', canonicalUrl)
     setMeta('property', 'og:image', socialImage)
     setMeta('name', 'twitter:card', image ? 'summary_large_image' : 'summary')
     setMeta('name', 'twitter:title', title)
     setMeta('name', 'twitter:description', description)
     setMeta('name', 'twitter:image', socialImage)
-    setMeta('name', 'robots', noindex ? 'noindex, nofollow' : undefined)
+    if (noindex) {
+      setMeta('name', 'robots', 'noindex, nofollow')
+    } else {
+      document.head.querySelector('meta[name="robots"]')?.remove()
+    }
 
     const canonical = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]')
     if (canonical) {
-      canonical.setAttribute('href', window.location.href)
+      canonical.setAttribute('href', canonicalUrl)
     } else {
       const link = document.createElement('link')
       link.setAttribute('rel', 'canonical')
-      link.setAttribute('href', window.location.href)
+      link.setAttribute('href', canonicalUrl)
       document.head.appendChild(link)
       created.push(link)
     }
