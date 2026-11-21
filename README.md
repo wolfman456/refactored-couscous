@@ -51,7 +51,7 @@ boot — see its README for `ADMIN_USER` / `ADMIN_PASSWORD`.
 `Dockerfile` builds the bundle and serves it from nginx, reverse-proxying `/api`
 and `/uploads` to the backend service. Configured at container start via
 `PORT`, `API_HOST` and `API_PORT`; details and caching rationale are in
-[`docs/DESIGN.md`](docs/DESIGN.md).
+[`docs/DESIGN.md`](docs/DESIGN.md). The production build adds nginx server-side includes to fetch gallery and article preview metadata from the API during direct page requests.
 
 ## CI
 
