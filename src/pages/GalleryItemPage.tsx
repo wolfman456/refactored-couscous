@@ -15,6 +15,7 @@ export default function GalleryItemPage() {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
 
   useSeo({
+    noindex: Boolean(error),
     title: item ? `${item.title} · Six Kids Crafts` : 'Piece · Six Kids Crafts',
     description: item ? metaDescription(item.description, FALLBACK_DESCRIPTION) : FALLBACK_DESCRIPTION,
     image: item?.images[0],
