@@ -153,3 +153,14 @@ describe('GalleryItemPage', () => {
     expect(screen.queryByRole('button', { name: /Enlarge photo/ })).toBeNull()
   })
 })
+
+it('keeps thumbnails aligned after a video', async () => {
+  mockFetch(() => jsonResponse({
+    ...sampleItem,
+    images: ['/uploads/clip.mp4', '/uploads/a.jpg', '/uploads/b.jpg'],
+    thumbnails: [null, '/uploads/a_thumb.jpg', '/uploads/b_thumb.jpg'],
+  }))
+  renderAt('1')
+  const secondPhoto = await screen.findByRole('img', { name: 'Oak shelf photo 2' })
+  expect(secondPhoto).toHaveAttribute('src', '/uploads/b_thumb.jpg')
+})

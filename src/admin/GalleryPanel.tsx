@@ -14,6 +14,7 @@ import PhotoPicker from '../components/PhotoPicker'
 interface DraftForm {
   title: string
   description: string
+  etsyListingUrl: string
   categoryId: string
   sortOrder: string
   published: boolean
@@ -23,6 +24,7 @@ interface DraftForm {
 const EMPTY_DRAFT: DraftForm = {
   title: '',
   description: '',
+  etsyListingUrl: '',
   categoryId: '',
   sortOrder: '0',
   published: false,
@@ -37,6 +39,7 @@ function draftFrom(item: GalleryItem): DraftForm {
   return {
     title: item.title,
     description: item.description ?? '',
+    etsyListingUrl: item.etsyListingUrl ?? '',
     categoryId: item.categoryId === null ? '' : String(item.categoryId),
     sortOrder: String(item.sortOrder),
     published: item.published,
@@ -89,6 +92,7 @@ export default function GalleryPanel() {
         {
           title: draft.title,
           description: draft.description,
+          etsyListingUrl: draft.etsyListingUrl.trim(),
           categoryId: draft.categoryId === '' ? null : Number(draft.categoryId),
           sortOrder: Number(draft.sortOrder),
           published: draft.published,
@@ -213,6 +217,14 @@ export default function GalleryPanel() {
           <textarea
             value={draft.description}
             onChange={(e) => setDraftField({ description: e.target.value })}
+          />
+        </label>
+        <label>
+          Etsy listing URL
+          <input
+            type="url"
+            value={draft.etsyListingUrl}
+            onChange={(e) => setDraftField({ etsyListingUrl: e.target.value })}
           />
         </label>
         {(draft.mediaIds.length > 0 || extraImage) && (
